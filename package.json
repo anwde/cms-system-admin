@@ -1,6 +1,6 @@
 {
-  "name": "react-typescript-template",
-  "version": "0.1.0",
+  "name": "cms-system-admin",
+  "version": "1.0.1",
   "private": true,
   "dependencies": {
     "@ant-design/pro-layout": "^6.34.7",
