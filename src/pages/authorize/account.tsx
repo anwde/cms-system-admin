@@ -10,4 +10,4 @@ class Account extends React.Component<any, any> {
     );
   }
 }
-export default Account;
+export default Account;  

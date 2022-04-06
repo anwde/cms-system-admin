@@ -1,33 +1,37 @@
 import React from "react";
 import webapi from "../../utils/webapi";
-import store from "../../redux/store"; 
-
-interface NavigationBarProps
-{
-  match:{
-    params:Object;
+import store from "../../redux/store";
+import type { TablePaginationConfig } from "antd";
+interface NavigationBarProps {
+  server: { loading: boolean };
+  match: {
+    params: Object,
   };
+  history:{
+    replace:(url:string)=>{};
+  }
 }
-export default class Basic_Component extends React.Component<NavigationBarProps>{
-   interval=0;
+ 
+export default class Basic_Component extends React.Component<NavigationBarProps> {
+  interval = 0;
   /**
    * 构造
    */
-  constructor(props={}) { 
+  constructor(props = {}) {
     super(props);
-    console.log('props data=>',props);
+    console.log("props data=>", props);
     this.state = this.__init_state();
   }
   /**
    * props 有变化
    */
-  UNSAFE_componentWillReceiveProps(props={}) { 
+  UNSAFE_componentWillReceiveProps(props = {}) {
     //  console.log('props data=>',props);
     // this.props = props;
-    const query = webapi.utils.query(); 
-    const q =  query.q ||"";
-    const params=this.__get_params();
-    const method =params.method || "index";
+    const query = webapi.utils.query();
+    const q = query.q || "";
+    const params = this.__get_params();
+    const method = params.method || "index";
     const id = params.id || 0;
     let flag = false;
     if (method !== this.state.method) {
@@ -62,7 +66,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
   __breadcrumb(data = {}) {
     store.dispatch({ type: "BREADCRUMB", data: data });
   }
-  __get_method(type:String) {
+  __get_method(type: String) {
     return `__${type}_${this.state.method}`;
   }
   __get_controller() {
@@ -83,7 +87,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * @param type string  公共方法处理
    * @return mixed
    */
-  __method(type:String) {
+  __method(type: String) {
     let method = this.__get_method(type);
     if (!(method in this)) {
       console.warn(`${this.__getName()}__method 方法:${method}不存在`);
@@ -96,11 +100,10 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
       return "";
     }
   }
-  __get_params():{}{
- 
-    return  this.props.params;
+  __get_params(): {} {
+    return this.props.params;
   }
-  __get_base64(img:any, callback:any) {
+  __get_base64(img: any, callback: any) {
     const reader = new FileReader();
     reader.addEventListener("load", () => callback(reader));
     reader.readAsDataURL(img);
@@ -149,7 +152,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
   /**
    * 定时器
    */
-  __setinterval(c = 200, success:any, d = 1000, _after:any) {
+  __setinterval(c = 200, success: any, d = 1000, _after: any) {
     let count = c;
     this.setState({ count });
     this.interval = window.setInterval(() => {
@@ -167,31 +170,47 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
   __clearinterval() {
     this.interval && window.clearInterval(this.interval);
   }
- 
+
   /*----------------------1 other end----------------------*/
 
   /*----------------------2 init start  ----------------------*/
+merger = (...opts) => {
+    let res = {};
+    
+    let combine = (opt) => {
+        for(let prop in opt) {
+            if(opt.hasOwnProperty(prop)) {
+                res[prop] = opt[prop];
+            }
+        }
+    }
+
+    //扩张运算符将两个对象合并到一个数组里，因此opts可以调用length方法
+    for (let i = 0; i < opts.length; i++) {
+        combine(opts[i]);
+    }
+    return res;
+} 
   /**
    * init_state 初始化状态 2=init
    * @return obj
    */
-  __init_state() {
-    console.log(this.props)
+  __init_state():Server.State {
     const query = webapi.utils.query();
-    const params=this.__get_params();
-    return {
-      q: query.q || "",
+    const params = this.__get_params(); 
+    return  {
       ...this.__init_state_before(),
+      q: query.q || "",
       method: params.method || "index",
       id: params.id || 0,
       order_field: "create_time",
       order_value: "desc",
       filters: [],
-      data: {},
+      data: {id:0},
       lists: [],
       pagination: this.__init_page_data(query),
-      ...this.__init_state_after(),
-    };
+      ...this.__init_state_after()
+    }; 
   }
   /**
    * init state  handle 初始化 state 和 handle
@@ -206,23 +225,24 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * 初始化状态前 父类state会覆盖
    * @return obj
    */
-  __init_state_before() {
+  __init_state_before(): {} {
     return {};
   }
   /**
    * 初始化状态后 可以覆盖父类state
    * @return obj
    */
-  __init_state_after() {
-    return {};
+  __init_state_after(): {} {
+    return {columns_children:[]};
   }
-  __init_page_data(data = {}) {
+  __init_page_data(data = {}):TablePaginationConfig {
+    // console.log('1111=>',TablePaginationConfig)
     return {
       showSizeChanger: false,
       hideOnSinglePage: true,
-      pageSize: data.page_size?(data.page_size*1):20,
+      pageSize: data.page_size ? data.page_size * 1 : 20,
       total: 0,
-      current: data.page?(data.page*1):1,
+      current: data.page ? data.page * 1 : 1,
       // onChange: this.handle_page_change,
       // onShowSizeChange: this.__handle_page_show_size_change,
     };
@@ -278,7 +298,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
     let method = this.__get_method("init");
     const pager = { ...this.state.pagination };
     pager.current = page;
-    pager.pageSize = page_size; 
+    pager.pageSize = page_size;
     this.setState(
       {
         pagination: pager,
@@ -286,15 +306,15 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
       () => {
         if (!(method in this)) {
           console.warn("__handle_page_change 方法:" + method + "不存在");
-        } else { 
+        } else {
           const urlParams = new URL(window.location.href);
-          const params = webapi.utils.query(); 
+          const params = webapi.utils.query();
           params.page = page;
           params.page_size = page_size;
           const param = webapi.utils.http_build_query(params);
           const url = urlParams.pathname + "?" + param;
-          this.props.history.replace(url); 
-          this[method](); 
+          this.props.history.replace(url);
+          this[method]();
         }
       }
     );
@@ -388,14 +408,14 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * 添加
    * @return obj
    */
-  __render_add() {
+  __render_add(): JSX.Element {
     return this.__render_add_edit("add");
   }
   /**
    * 编辑
    * @return obj
    */
-  __render_edit() {
+  __render_edit(): JSX.Element {
     return this.__render_add_edit("edit");
   }
   /**
@@ -403,7 +423,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * @return obj
    */
   __render_add_edit(u_action) {
-    return "";
+    return <></>
   }
   /*----------------------4 render end----------------------*/
 }

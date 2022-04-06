@@ -40,9 +40,9 @@ function encode(input) {
  * @returns {Object}
  * @api public
  */
-function querystring(query) {
+function querystring(query:String):Object {
   var parser = /([^=?#&]+)=?([^&]*)/g
-    , result = {}
+    , result = {filters:{}}
     , part;
 
   while (part = parser.exec(query)) {

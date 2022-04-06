@@ -13,6 +13,7 @@ import webapi from "../utils/webapi";
 import { RightContent } from "../components/header/index";
 import { Outlet, Route, Routes, useParams } from "react-router-dom";
 const Columns = lazy(() => import("../pages/authorize/columns"));
+const Account = lazy(() => import("../pages/authorize/account"));
 const content = (
   <Descriptions size="small" column={2}>
     <Descriptions.Item label="创建人">张三</Descriptions.Item>

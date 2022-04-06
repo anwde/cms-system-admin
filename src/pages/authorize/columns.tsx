@@ -1,4 +1,4 @@
-import React from "react";
+import React, { RefObject } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import webapi from "../../utils/webapi";
@@ -14,7 +14,7 @@ import {
   Tabs,
   Tree,
   Drawer,
-  Space
+  Space,
 } from "antd";
 import {
   UploadOutlined,
@@ -23,9 +23,13 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 import Basic_Component from "../../components/base/component";
-import ProTable, { ProColumns, ActionType } from "@ant-design/pro-table";
+import ProTable from "@ant-design/pro-table";
+import type { ProColumns, ActionType } from "@ant-design/pro-table";
+
+
 import "@ant-design/pro-table/dist/table.css";
-import {withRouter} from "../../utils/router";
+import { withRouter } from "../../utils/router";
+import { FormInstance } from 'antd/lib/form';
 const BREADCRUMB = {
   title: "栏目组件",
   lists: [
@@ -34,18 +38,36 @@ const BREADCRUMB = {
   ],
   buttons: [],
 };
+type Module_data = {
+  [key: number]: { id: number; name: string };
+};
+type Module = {
+  model: Module_data;
+  templates: Module_data;
+  types: Module_data;
+};
+type State = Server.State & {
+  columns_children?: [];
+  module: Module;
+  data: Server.Columns;
+  u_action: string;
+  drawer_visible: boolean;
+};
+const Default_Module={ model: {}, templates: {}, types: {} };
 class Columns extends Basic_Component {
-  formRef = React.createRef();
+  formRef: React.RefObject<FormInstance>=React.createRef<FormInstance>();
   columns_children = [];
-  model = {};
-  templates = {};
-  type = {};
+  module: Module = Default_Module;
+  data = { id: 0, name: "" };
   /**
    * 构造
    */
-  // constructor(props) {
-  //   super(props);
-  // }
+  constructor(props: any) {
+    super(props);
+    console.log('props=>',props);
+    // this.state = this.__init_state() as State;
+    // this.formRef = React.createRef<FormInstance>();
+  }
 
   /**
    * 面包屑导航
@@ -53,10 +75,10 @@ class Columns extends Basic_Component {
   __breadcrumb(data = {}) {
     super.__breadcrumb({ ...BREADCRUMB, ...data });
   }
-  __init_state_before() {
+  __init_state_before(): {} {
     return {
       columns_children: [],
-      module: { model: {}, templates: [], type: [] },
+      module: Default_Module,
     };
   }
   __handle_init_before = () => {
@@ -71,24 +93,23 @@ class Columns extends Basic_Component {
    * @return obj
    */
   async get_module(reset = false) {
-    let model = this.model || {};
-    let templates = this.templates || {};
-    let type = this.type || [];
+    let module = this.module;
     if (
       reset ||
-      Object.keys(model).length === 0 ||
-      Object.keys(templates).length === 0 
+      Object.keys(module.model).length === 0 ||
+      Object.keys(module.templates).length === 0 ||
+      Object.keys(module.types).length === 0
     ) {
-      var data = await webapi.request.get("authorize/columns/module");
+      const data = await webapi.request.get("authorize/columns/module");
       if (data.code === 10000) {
-        this.model = model = data.data.model;
-        this.templates = templates = data.data.templates;
-        this.type = type = data.data.type;
+        module.model = data.data.model;
+        module.templates = data.data.templates;
+        module.types = data.data.types;
+        this.module = module;
       }
     }
-    return { model, templates, type };
+    return module;
   }
-
   /**
    * 获取栏目树
    * @return obj
@@ -111,8 +132,11 @@ class Columns extends Basic_Component {
    * 获取栏目
    * @return obj
    */
-  async get_columns(reset = false, id) {
-    let data = this.data || {};
+  async get_columns(
+    reset: boolean = false,
+    id?: number
+  ): Promise<Server.Columns> {
+    let data = this.data;
     if (reset || Object.keys(data).length === 0) {
       const res = await webapi.request.get("authorize/columns/get", {
         data: {
@@ -132,7 +156,7 @@ class Columns extends Basic_Component {
   /**
    * index  列表数据
    */
-  async __init_index(data = {}) {
+  async __init_index(data: Server.Query = {}) {
     const b = {
       buttons: [
         { title: "添加栏目", url: "/authorize/columns/add" },
@@ -149,14 +173,14 @@ class Columns extends Basic_Component {
     if (!data.filters) {
       data.filters = {};
     }
-    if (query.filters) {
-      try {
-        data.filters = JSON.parse(query.filters);
-      } catch (err) {}
-    }
-    if (query.customerappid) {
-      data.filters.client_id = query.customerappid;
-    }
+    // if (query.filters) {
+    //   try {
+    //     data.filters = JSON.parse(query.filters);
+    //   } catch (err) {}
+    // }
+    // if (query.customerappid) {
+    //   data.filters.client_id = query.customerappid;
+    // }
     var res = await webapi.request.get("authorize/columns/lists", { data });
     var lists = [];
     if (res.code === 10000 && res.num_rows > 0) {
@@ -172,12 +196,12 @@ class Columns extends Basic_Component {
 
   /*----------------------2 init end  ----------------------*/
 
-  async __init_add_edit(action) {
+  async __init_add_edit(action: string) {
     this.handle_init_add_edit(action, this.state.id);
-    let data = {};
+    let data: Server.Columns = { id: this.state.id };
     let b = { title: BREADCRUMB.title };
     if (action === "edit" && this.state.id) {
-      data = await this.get_columns(1, this.state.id);
+      data = await this.get_columns(true, this.state.id);
       b.title = `${BREADCRUMB.title}-${data.name}-编辑`;
     } else {
       b.title = `${BREADCRUMB.title}-添加`;
@@ -208,34 +232,29 @@ class Columns extends Basic_Component {
 
   /*----------------------3 handle start----------------------*/
 
-  handle_parent_id = (value) => {
-    if (value.length === 0) {
-      return this.setState({
-        parent_id: 0,
-      });
+  handle_parent_id = (value: number[], op: any): void => {
+    let parent_id: number = 0;
+    if (value.length > 0) {
+      parent_id = value[value.length - 1];
     }
-    const parent_id = value[value.length - 1];
     if (parent_id !== this.state.id) {
       this.setState({
-        parent_id: parent_id,
+        data: { ...this.state.data, parent_id: parent_id },
       });
     }
   };
-
   /**
    * 提交
    **/
-  handle_submit = async (data = {id:'',parent_id:'',image:''}) => {
-    var url = "authorize/columns/dopost";
-    var history = "/authorize/columns";
-    data.id = this.state.id;
-    data.parent_id = this.state.parent_id;
-    data.image = this.state.data.image;
-    var res = await webapi.request.post(url, { data });
+  handle_submit = async (data: Server.Columns) => { 
+    const state = this.state;
+    data.id = state.id;
+    data.image = data.image;
+    var res = await webapi.request.post('authorize/columns/dopost', { data });
     if (res.code === 10000) {
       this.get_children(true);
-      webapi.message.success(res.message);
-      this.props.history.replace(history);
+      webapi.message.success(res.message); 
+      this.props.history.replace('/authorize/columns');
     } else {
       webapi.message.error(res.message);
     }
@@ -244,11 +263,11 @@ class Columns extends Basic_Component {
   /**
    * 集中 删除
    **/
-  handle_do_delete(url, id) {
+  handle_do_delete(url: string, id: number) {
     webapi.confirm({
       url: "authorize/columns/" + url,
       data: { id },
-      success: (data) => {
+      success: (data: Server.Status) => {
         if (data.status === "success") {
           webapi.message.success(data.message);
           this.__method("init");
@@ -261,37 +280,34 @@ class Columns extends Basic_Component {
   /**
    * 删除
    **/
-  handle_delete = (id) => {
+  handle_delete = (id: number) => {
     this.handle_do_delete("delete", id);
   };
-  handle_columns_check = (selectedKeys, info) => {
+  handle_columns_check = (selectedKeys: []) => {
     this.setState({ data: { ...this.state.data, ids: selectedKeys } });
   };
   handle_add = () => {
     this.setState({ drawer_visible: true, u_action: "add" });
   };
-  handle_filterDropdownVisibleChange = (visible) => {
+  handle_filterDropdownVisibleChange = (visible: any) => {
     console.log(visible);
   };
   handle_drawer_close = () => {
-    this.formRef.current.resetFields();
+    this.formRef.current && this.formRef.current.resetFields();
     this.setState({
       drawer_visible: false,
     });
   };
   handle_drawer_submit = () => {
-    this.formRef.current
-      .validateFields()
-      .then((data) => {
+    this.formRef.current &&
+      this.formRef.current.validateFields().then((data: Server.Columns) => {
         this.handle_finish_dopost(data);
-      })
-      .catch((info) => {
-        //console.log('Validate Failed:', info);
       });
   };
-  handle_finish_dopost = async (data = {}) => {
-    data.id = this.state.columns_id || 0;
-    data.parent_id = this.state.parent_id || 0;
+  handle_finish_dopost = async (data: Server.Columns) => {
+    const state = this.state as Server.Columns;
+    data.id = state.columns_id || 0;
+    data.parent_id = state.parent_id || 0;
     const res = await webapi.request.post("authorize/columns/dopost", {
       data,
     });
@@ -304,15 +320,15 @@ class Columns extends Basic_Component {
       webapi.message.error(res.message);
     }
   };
-  handle_select = (selectedKeys, info) => {
+  handle_select = (selectedKeys: any, info: any) => {
     if (info.node.key > 0) {
-      this.handle_init_add_edit("edit", info.node.key);
+      this.handle_init_add_edit("edit", info.node.key * 1);
     }
   };
-  handle_drag_end = (info) => {
+  handle_drag_end = (info: any) => {
     console.log(info);
   };
-  handle_drop = async (info) => {
+  handle_drop = async (info: any) => {
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
     const res = await webapi.request.post("authorize/columns/dopost", {
@@ -322,10 +338,10 @@ class Columns extends Basic_Component {
       this.__init_children();
     }
   };
-  handle_init_add_edit = async (action, id) => {
+  handle_init_add_edit = async (action: string, id: number) => {
     const columns_children = await this.get_children();
     const module = await this.get_module();
-    const data = await this.get_columns(1, id);
+    const data = await this.get_columns(true, id);
     this.setState({
       columns_children,
       module,
@@ -345,11 +361,13 @@ class Columns extends Basic_Component {
    * 渲染 首页
    **/
   __render_index() {
-    const type = this.state.module["type"] || {};
-    const model = this.state.module["model"] || {};
-    const templates = this.state.module["templates"] || {};
-
-    const columns = [
+    const state = this.state as State;
+    const module = state.module;
+    const types = module.types;
+    const model = module.model;
+    const templates = module.templates;
+    console.log(module);
+    const columns: ProColumns<Server.Columns>[] = [
       {
         title: "ID",
         sorter: true,
@@ -370,8 +388,9 @@ class Columns extends Basic_Component {
         sorter: true,
         dataIndex: "type",
         align: "center",
-        render: (field, data) => {
-          return type[data.type] && type[data.type]["name"];
+        render: (_, row: Server.Columns) => {
+          let i = row.type as number;
+          return <>{types[i] && types[i]["name"]}</>;
         },
       },
       {
@@ -379,8 +398,9 @@ class Columns extends Basic_Component {
         sorter: true,
         dataIndex: "model_id",
         align: "center",
-        render: (field, data) => {
-          return model[data.model_id] && model[data.model_id]["name"];
+        render: (_, row) => {
+          let i = row.type as number;
+          return model[i] && model[i]["name"];
         },
       },
       {
@@ -388,11 +408,9 @@ class Columns extends Basic_Component {
         sorter: true,
         dataIndex: "template_content",
         align: "center",
-        render: (field, data) => {
-          return (
-            templates[data.template_content] &&
-            templates[data.template_content]["name"]
-          );
+        render: (_, row) => {
+          let i = row.type as number;
+          return templates[i] && templates[i]["name"];
         },
       },
       {
@@ -400,11 +418,9 @@ class Columns extends Basic_Component {
         sorter: true,
         dataIndex: "template_list",
         align: "center",
-        render: (field, data) => {
-          return (
-            templates[data.template_list] &&
-            templates[data.template_list]["name"]
-          );
+        render: (_, row) => {
+          let i = row.type as number;
+          return templates[i] && templates[i]["name"];
         },
       },
       {
@@ -412,11 +428,9 @@ class Columns extends Basic_Component {
         sorter: true,
         dataIndex: "template_category",
         align: "center",
-        render: (field, data) => {
-          return (
-            templates[data.template_category] &&
-            templates[data.template_category]["name"]
-          );
+        render: (_, row) => {
+          let i = row.type as number;
+          return templates[i] && templates[i]["name"];
         },
       },
 
@@ -425,10 +439,12 @@ class Columns extends Basic_Component {
         sorter: true,
         hideInSearch: true,
         dataIndex: "create_time",
-        render: (field, data) => {
-          return moment(data.create_time * 1000).format("YYYY-MM-DD HH:mm:ss");
-        },
         align: "center",
+        render: (_, row) => {
+          return moment((row.create_time as number) * 1000).format(
+            "YYYY-MM-DD HH:mm:ss"
+          );
+        },
       },
       {
         title: "时间",
@@ -436,7 +452,7 @@ class Columns extends Basic_Component {
         valueType: "dateRange",
         hideInTable: true,
         search: {
-          transform: (value) => {
+          transform: (value: [0, 1]) => {
             return {
               create_time: { start: value[0], end: value[1] },
             };
@@ -450,11 +466,11 @@ class Columns extends Basic_Component {
         valueType: "option",
         filters: [],
         onFilterDropdownVisibleChange: this.handle_filterDropdownVisibleChange,
-        filterIcon: (filtered) => (
+        filterIcon: (filtered: any) => (
           <SettingFilled style={{ color: filtered ? "#1890ff" : "" }} />
         ),
         filterDropdownVisible: false,
-        render: (field, data) => {
+        render: (_, row) => {
           return (
             <Space>
               <Button
@@ -463,11 +479,11 @@ class Columns extends Basic_Component {
                 icon={<DeleteOutlined />}
                 title="删除"
                 onClick={() => {
-                  this.handle_delete(data.id);
+                  this.handle_delete(row.id);
                 }}
               />
 
-              <Link to={`/authorize/columns/edit/${data.id}`}>
+              <Link to={`/authorize/columns/edit/${row.id}`}>
                 <Button type="primary" shape="circle" icon={<EditOutlined />} />
               </Link>
             </Space>
@@ -478,18 +494,13 @@ class Columns extends Basic_Component {
     return (
       <ProTable
         headerTitle="查询表格"
-        rowKey={(res) => res.id}
-        columns={columns}
-        dataSource={this.state.lists}
+        rowKey={"id"}
+        columns={columns} 
         pagination={this.state.pagination}
+        dataSource={this.state.lists}
         loading={this.props.server.loading}
         onChange={this.__handle_table_change}
         scroll={{ x: 1500, y: "calc(100vh - 290px)" }}
-        request={(params, sort, filter) => {
-          // console.log(params, sort, filter); 
-          // this.__init_index({where:params})
-        }}
-      
         toolBarRender={() => [
           <Button type="primary" key="primary" onClick={() => {}}>
             新建
@@ -508,11 +519,18 @@ class Columns extends Basic_Component {
    * 添加、编辑
    * @return obj
    */
-  __render_add_edit_children(u_action) {
-    const data = this.state.data || {};
-    const type = this.state.module["type"] || {};
-    const model = this.state.module["model"] || {};
-    const templates = this.state.module["templates"] || {};
+  __render_add_edit_children(u_action: string) {
+    const state = this.state as State;
+    const data = state.data;
+    const module = state.module; 
+    const templates = module.templates;
+    const types = module.types;
+    const model = module.model;
+    const columns_children = state.columns_children;
+    // console.log('templates',(templates))
+    // Object.entries(templates).map(([key, val]) => {
+    //   console.log('templates',val) 
+    // });
     return (
       <>
         <Tabs defaultActiveKey="1">
@@ -523,11 +541,10 @@ class Columns extends Basic_Component {
 
             <Form.Item name="parent_id_all" label="上级">
               <Cascader
-                // initialValues={data.parent_id_all||[]}
-                options={this.state.columns_children}
+                options={columns_children}
                 fieldNames={{ label: "title", value: "key" }}
                 changeOnSelect
-                onChange={this.handle_parent_id}
+                // onChange={this.handle_parent_id}
               />
             </Form.Item>
 
@@ -552,10 +569,10 @@ class Columns extends Basic_Component {
             </Form.Item>
             <Form.Item name="type" label="类型">
               <Select>
-                {Object.keys(type).map((val, key) => {
+                {Object.entries(types).map(([key, val]) => {
                   return (
-                    <Select.Option key={key} value={type[val]["id"]}>
-                      {type[val]["name"]}
+                    <Select.Option key={key} value={val.id}>
+                      {val.name}
                     </Select.Option>
                   );
                 })}
@@ -563,10 +580,10 @@ class Columns extends Basic_Component {
             </Form.Item>
             <Form.Item name="model_id" label="模型">
               <Select>
-                {Object.keys(model).map((val, key) => {
+                {Object.entries(model).map(([key, val]) => {
                   return (
-                    <Select.Option key={key} value={model[val]["id"]}>
-                      {model[val]["name"]}
+                    <Select.Option key={key} value={val.id}>
+                      {val.name}
                     </Select.Option>
                   );
                 })}
@@ -626,38 +643,35 @@ class Columns extends Basic_Component {
             </Form.Item>
             <Form.Item name="template_content" label="内容模板">
               <Select>
-                {templates &&
-                  Object.keys(templates).map((val, key) => {
-                    return (
-                      <Select.Option key={key} value={templates[val].id}>
-                        {templates[val].name}
-                      </Select.Option>
-                    );
-                  })}
+                {Object.entries(templates).map(([key, val]) => {
+                  return (
+                    <Select.Option key={key} value={val.id}>
+                      {val.name}
+                    </Select.Option>
+                  );
+                })}
               </Select>
             </Form.Item>
             <Form.Item name="template_list" label="列表模板">
               <Select>
-                {templates &&
-                  Object.keys(templates).map((val, key) => {
-                    return (
-                      <Select.Option key={key} value={templates[val].id}>
-                        {templates[val].name}
-                      </Select.Option>
-                    );
-                  })}
+                {Object.entries(templates).map(([key, val]) => {
+                  return (
+                    <Select.Option key={key} value={val.id}>
+                      {val.name}
+                    </Select.Option>
+                  );
+                })}
               </Select>
             </Form.Item>
             <Form.Item name="template_category" label="栏目模板">
               <Select>
-                {templates &&
-                  Object.keys(templates).map((val, key) => {
-                    return (
-                      <Select.Option key={key} value={templates[val].id}>
-                        {templates[val].name}
-                      </Select.Option>
-                    );
-                  })}
+                {Object.entries(templates).map(([key, val]) => {
+                  return (
+                    <Select.Option key={key} value={val.id}>
+                      {val.name}
+                    </Select.Option>
+                  );
+                })}
               </Select>
             </Form.Item>
           </Tabs.TabPane>
@@ -680,7 +694,7 @@ class Columns extends Basic_Component {
    * 添加、编辑
    * @return obj
    */
-  __render_add_edit(u_action) {
+  __render_add_edit(u_action: string): JSX.Element {
     return (
       <Form
         ref={this.formRef}
@@ -694,9 +708,9 @@ class Columns extends Basic_Component {
             htmlType="submit"
             shape="round"
             style={{ marginRight: "8px" }}
-            loading={this.props.loading}
+            loading={this.props.server.loading}
           >
-            {this.props.loading ? "正在提交" : "立即提交"}
+            {this.props.server.loading ? "正在提交" : "立即提交"}
           </Button>
           <Link className="button" to={"/authorize/columns"}>
             返回
@@ -707,7 +721,8 @@ class Columns extends Basic_Component {
   }
 
   __render_children() {
-    const children = this.state.columns_children || [];
+    const state = this.state as State;
+    const children = state.columns_children;
     return (
       <>
         <Tree
@@ -721,11 +736,11 @@ class Columns extends Basic_Component {
           treeData={children}
         />
         <Drawer
-          title={(this.state.u_action === "add" ? "添加" : "编辑") + "栏目"}
+          title={(state.u_action === "add" ? "添加" : "编辑") + "栏目"}
           width={"61.8%"}
           forceRender={true}
           onClose={this.handle_drawer_close}
-          visible={this.state.drawer_visible}
+          visible={state.drawer_visible}
           bodyStyle={{ paddingBottom: 80 }}
           footer={
             <div
@@ -742,7 +757,7 @@ class Columns extends Basic_Component {
               </Button>
               <Button
                 shape="round"
-                loading={this.props.loading}
+                loading={this.props.server.loading}
                 type="primary"
                 onClick={this.handle_drawer_submit}
               >
@@ -756,7 +771,7 @@ class Columns extends Basic_Component {
             onFinish={this.handle_submit}
             {...this.__form_item_layout()}
           >
-            {this.__render_add_edit_children(this.state.u_action)}
+            {this.__render_add_edit_children(state.u_action)}
           </Form>
         </Drawer>
       </>

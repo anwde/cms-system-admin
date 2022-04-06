@@ -1,71 +1,70 @@
 /// <reference types="node" />
 /// <reference types="react" />
-/// <reference types="react-dom" />
-
+/// <reference types="react-dom" /> 
 declare namespace NodeJS {
   interface ProcessEnv {
-    readonly NODE_ENV: 'development' | 'production' | 'test';
+    readonly NODE_ENV: "development" | "production" | "test";
     readonly PUBLIC_URL: string;
   }
 }
 
-declare module '*.avif' {
+declare module "*.avif" {
   const src: string;
   export default src;
 }
 
-declare module '*.bmp' {
+declare module "*.bmp" {
   const src: string;
   export default src;
 }
 
-declare module '*.gif' {
+declare module "*.gif" {
   const src: string;
   export default src;
 }
 
-declare module '*.jpg' {
+declare module "*.jpg" {
   const src: string;
   export default src;
 }
 
-declare module '*.jpeg' {
+declare module "*.jpeg" {
   const src: string;
   export default src;
 }
 
-declare module '*.png' {
+declare module "*.png" {
   const src: string;
   export default src;
 }
 
-declare module '*.webp' {
-    const src: string;
-    export default src;
+declare module "*.webp" {
+  const src: string;
+  export default src;
 }
 
-declare module '*.svg' {
-  import * as React from 'react';
+declare module "*.svg" {
+  import * as React from "react";
 
-  export const ReactComponent: React.FunctionComponent<React.SVGProps<
-    SVGSVGElement
-  > & { title?: string }>;
+  export const ReactComponent: React.FunctionComponent<
+    React.SVGProps<SVGSVGElement> & { title?: string }
+  >;
 
   const src: string;
   export default src;
 }
 
-declare module '*.module.css' {
+declare module "*.module.css" {
   const classes: { readonly [key: string]: string };
   export default classes;
 }
 
-declare module '*.module.scss' {
+declare module "*.module.scss" {
   const classes: { readonly [key: string]: string };
   export default classes;
 }
 
-declare module '*.module.sass' {
+declare module "*.module.sass" {
   const classes: { readonly [key: string]: string };
   export default classes;
 }
@@ -73,20 +72,152 @@ declare module "*.less" {
   const content: { [className: string]: string };
   export default content;
 }
- 
+
 // @ts-ignore
 /* eslint-disable */
-declare namespace Server { 
-  type Server = { 
+declare namespace Server {
+  type Server = {
     is_auth?: Boolean;
     server: {
-      ucdata: {},
-      columns: [],
-      menus: [],
-      loading: Boolean,
-      code: number,
-      version: string
-    },
+      ucdata: {};
+      columns: [];
+      menus: [];
+      loading: Boolean;
+      code: number;
+      version: string;
+    };
+  };
+  type Query = {
+    order_field?: string;
+    order_value?: string;
+    row_count?: number;
+    offset?: number;
+    q?: string;
+    filters?: object;
+    customerappid?: string;
+  };
+  type Columns = {
+    id: number;
+    columns_id?: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    module_id?: number;
+    type?: number;
+    model_id?: number;
+    group_id?: number;
+    parent_id?: number;
+    parent_id_all?: string;
+    child_id_all?: string;
+    childmap?: number;
+    name?: string;
+    style?: string;
+    image?: any;
+    intro?: string;
+    icon?: string;
+    description?: string;
+    keywords?: string;
+    parentdir?: string;
+    catdir?: string;
+    url?: number;
+    pdurl?: number;
+    template_content?: number;
+    template_list?: number;
+    template_category?: number;
+    update_time?: number;
+    create_time?: number;
+  };
+  type Columns_type = {
+    id?: number;
+  };
+  type Status = {
+    status: string;
+    code: number;
+    message: string;
+  };
+  type Templates = {
+    id?: number;
+    templates_id?: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    name?: string;
+    file?: string;
+    type?: number;
+    data?: string;
+    update_time?: number;
+    create_time?: number;
+  };
+  type Model = {
+    id?: number;
+    model_id?: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    name?: string;
+    intro?: string;
+    tablename?: string;
+    items?: number;
+    enablesearch?: number;
+    disabled?: number;
+    update_time?: number;
+    create_time?: number;
+  };
+  type Model_field = {
+    id?: number;
+    model_id?: number;
+    model_field?: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    name?: string;
+    field?: string;
+    tips?: string;
+    css?: string;
+    minlength?: string;
+    maxlength?: string;
+    constraint?: string;
+    pattern?: string;
+    errortips?: string;
+    formtype?: string;
+    setting?: string;
+    formattribute?: string;
+    unsetgroupids?: string;
+    unsetroleids?: string;
+    is_system?: string;
+    is_unique?: string;
+    is_base?: string;
+    is_search?: number;
+    is_add?: number;
+    idx?: number;
+    disabled?: number;
+    is_omnipotent?: number;
+    is_core?: number;
+    defaultvalues?: number;
+    is_position?: number;
+    comment?: number;
+    datatype?: number;
+    update_time?: number;
+    create_time?: number;
+  };
+  type State = {
+    id:number;
+    data: {};
+    lists: [];
+    q: string; 
+    order_field: string;
+    method: string;
+    order_value: any;
+    filters: any; 
+    pagination: {
+      showSizeChanger: boolean;
+      hideOnSinglePage: boolean;
+      pageSize: number;
+      total: number;
+      current: number;
+      onChange: (page: number, pageSize: number) => void;
+      onShowSizeChange: (page: number, pageSize: number) => void;
+    };
   };
 }
 declare namespace API {
@@ -172,7 +303,7 @@ declare namespace API {
     success?: boolean;
   };
 
-  type NoticeIconItemType = 'notification' | 'message' | 'event';
+  type NoticeIconItemType = "notification" | "message" | "event";
 
   type NoticeIconItem = {
     id?: string;

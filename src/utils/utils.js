@@ -58,7 +58,7 @@ const redirect = (data) => {
     process.env.NODE_ENV === "development" ||
     cache.get("test") === "development"
   ) {
-    return console.log("redirect=>", data);
+    // return console.log("redirect=>", data);
   }
   let url = data.redirect || "";
   let reg = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?/;

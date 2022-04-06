@@ -42,7 +42,6 @@ class App extends React.Component<{}, Server.Server, any> {
   /*--------------------------------------------------------------------------------
     *  server 
   --------------------------------------------------------------------------------*/
-
   async server() {
     if (process.env.NODE_ENV === "development") {
       require("./test.js");
