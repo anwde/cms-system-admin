@@ -232,8 +232,8 @@ class Columns extends Basic_Component {
 
   /*----------------------3 handle start----------------------*/
 
-  handle_parent_id = (value: number[], op: any): void => {
-    let parent_id: number = 0;
+  handle_parent_id = (value: (string | number)[]): void => {
+    let parent_id: string | number = 0;
     if (value.length > 0) {
       parent_id = value[value.length - 1];
     }
@@ -544,7 +544,7 @@ class Columns extends Basic_Component {
                 options={columns_children}
                 fieldNames={{ label: "title", value: "key" }}
                 changeOnSelect
-                // onChange={this.handle_parent_id}
+                onChange={this.handle_parent_id}
               />
             </Form.Item>
 

@@ -1,4 +1,4 @@
-import React, { useState, lazy,useEffect } from "react";
+import React, { useState, lazy, useEffect } from "react";
 import { Button, Descriptions, Result, Avatar, Space, Statistic } from "antd";
 import { LikeOutlined, UserOutlined } from "@ant-design/icons";
 import "@/App.css";
@@ -8,10 +8,13 @@ import ProLayout, {
   SettingDrawer,
 } from "@ant-design/pro-layout";
 import defaultProps from "./_defaultProps";
-import routes from "../routes";
+import routers from "../routes/router";
 import webapi from "../utils/webapi";
 import { RightContent } from "../components/header/index";
 import { Outlet, Route, Routes, useParams } from "react-router-dom";
+import Loading from "../components/loading/loading";
+import type { MenuDataItem } from "@ant-design/pro-layout";
+import { Link } from "react-router-dom";
 const Columns = lazy(() => import("../pages/authorize/columns"));
 const Account = lazy(() => import("../pages/authorize/account"));
 const content = (
@@ -25,14 +28,34 @@ const content = (
     <Descriptions.Item label="备注">中国</Descriptions.Item>
   </Descriptions>
 );
-
+const loopMenuItem = (columns: []): MenuDataItem[] =>{
+  console.log("props=>", columns);
+  return columns.map(({ icon, children, name, url }) => ({
+    name, 
+    icon,
+    path: url,
+    routes: children && loopMenuItem(children),
+  }));
+}
+  ;
 const Layout1 = () => {
   const [settings, setSetting] = useState<Partial<ProSettings> | undefined>({
     fixSiderbar: true,
   });
+  const [server, setServer] = useState<{columns:[]}>({columns:[]});
+
   const [pathname, setPathname] = useState("/welcome");
   const p = useParams();
-  console.log(p);
+  console.log("Params=>", p);
+  useEffect(() => {
+    console.log("props=>", server.columns);
+    webapi.store.subscribe(() => {
+      const d = webapi.store.getState();
+      setServer(d.server);
+      console.log("props=>", server.columns);
+    });
+  },[]);
+  // server?.server?.columns
   return (
     <>
       <ProLayout
@@ -41,55 +64,24 @@ const Layout1 = () => {
         location={{
           pathname,
         }}
+        menu={{ request: async () => loopMenuItem(server.columns) }}
         onMenuHeaderClick={(e) => console.log(e)}
-        menuItemRender={(item, dom) => (
-          <a
-            onClick={() => {
-              setPathname(item.path || "/welcome");
-            }}
-          >
-            {dom}
-          </a>
-        )}
+        menuItemRender={(item, dom) => {
+          return (
+            <Link
+              to={`${item.path}`}
+              onClick={() => {
+                setPathname(item.path || "/welcome");
+              }}
+            >
+              {dom}
+            </Link>
+          );
+        }}
         rightContentRender={() => <RightContent />}
         {...settings}
       >
-        <PageContainer
-          content={content}
-          tabList={[
-            {
-              tab: "基本信息",
-              key: "base",
-            },
-            {
-              tab: "详细信息",
-              key: "info",
-            },
-          ]}
-          extraContent={
-            <Space size={24}>
-              <Statistic
-                title="Feedback"
-                value={1128}
-                prefix={<LikeOutlined />}
-              />
-              <Statistic title="Unmerged" value={93} suffix="/ 100" />
-            </Space>
-          }
-          extra={[
-            <Button key="3">操作</Button>,
-            <Button key="2">操作</Button>,
-            <Button key="1" type="primary">
-              主操作
-            </Button>,
-          ]}
-          footer={[
-            <Button key="3">重置</Button>,
-            <Button key="2" type="primary">
-              提交
-            </Button>,
-          ]}
-        >
+         
           <div
             style={{
               height: "120vh",
@@ -97,7 +89,7 @@ const Layout1 = () => {
           >
             <Outlet />
           </div>
-        </PageContainer>
+         
       </ProLayout>
       <SettingDrawer
         pathname={pathname}
@@ -112,8 +104,33 @@ const Layout1 = () => {
     </>
   );
 };
- 
- 
+
+const Irouters = (
+  routes: Server.Routes[],
+  pprop: Server.Routes = { path: "" }
+) => {
+  console.log("useParams=>", useParams());
+  return routes.map((prop, key) => {
+    let { Component, path } = prop;
+    if (!Component && pprop.Component) {
+      Component = prop.Component = pprop.Component;
+    }
+    // console.log("Component", Component);
+    return (
+      <Route
+        path={path}
+        key={key}
+        element={
+          <React.Suspense fallback={<Loading />}>
+            <Component />
+          </React.Suspense>
+        }
+      >
+        {prop.children ? Irouters(prop.children, prop) : ""}
+      </Route>
+    );
+  });
+};
 const Security = () => {
   const Element_Columns = (
     <React.Suspense fallback={<>...</>}>
@@ -121,19 +138,14 @@ const Security = () => {
     </React.Suspense>
   );
   // useEffect(()=>{
-  //   console.log(useParams());
+  // console.log("useParams=>", useParams());
   // },[])
-  // const {Layout,params}=Layout1();
-  console.log(useParams());
+  console.log("useParams=>", useParams());
   return (
     <React.Suspense fallback={<>...</>}>
       <Routes>
         <Route path="/" element={<Layout1 />}>
-          <Route
-            path="/authorize/columns"
-            element={Element_Columns}
-             
-          >
+          <Route path="/authorize/columns" element={Element_Columns}>
             <Route path="/authorize/columns/:method" element={Element_Columns}>
               <Route
                 path="/authorize/columns/:method/:id"
@@ -141,6 +153,7 @@ const Security = () => {
               />
             </Route>
           </Route>
+          {Irouters(routers)}
         </Route>
       </Routes>
     </React.Suspense>

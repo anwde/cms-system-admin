@@ -1,15 +1,14 @@
-import React, { lazy } from "react";
-import type { RouteObject } from "react-router-dom";
+import React from "react";
+const Account = React.lazy(() => import("../pages/authorize/account"));
+const Columns = React.lazy(() => import("../pages/authorize/columns"));
+const Menus = React.lazy(() => import("../pages/authorize/menus"));
+const Competence = React.lazy(() => import("../pages/authorize/menus"));
+const Permission = React.lazy(() => import("../pages/authorize/menus"));
 
-const Account = lazy(() => import("../pages/authorize/account"));
-const Columns = lazy(() => import("../pages/authorize/columns"));
-const Menus = lazy(() => import("../pages/authorize/menus"));
-const Competence = lazy(() => import("../pages/authorize/menus"));
-const Permission = lazy(() => import("../pages/authorize/menus"));
-let routes: RouteObject[] = [
+let routes: Server.Routes[] = [
   {
     path: "/authorize/account",
-    element: Account,
+    Component: Account,
     children: [
       {
         path: "/authorize/account/:method",
@@ -19,7 +18,7 @@ let routes: RouteObject[] = [
   },
   {
     path: "/authorize/columns",
-    element: Columns,
+    Component: Columns,
     children: [
       {
         path: "/authorize/columns/:method",
@@ -29,7 +28,7 @@ let routes: RouteObject[] = [
   },
   {
     path: "/authorize/competence",
-    element: Competence,
+    Component: Competence,
     children: [
       {
         path: "/authorize/competence/:method",
@@ -40,7 +39,7 @@ let routes: RouteObject[] = [
   },
   {
     path: "/authorize/permission",
-    element: Permission,
+    Component: Permission,
     children: [
       {
         path: "/authorize/permission/:method",
@@ -51,12 +50,12 @@ let routes: RouteObject[] = [
   },
   {
     path: "/authorize/menus",
-    element: Menus,
+    Component: Menus,
     children: [
       {
         path: "/authorize/menus/:method",
-        element: Menus,
-        children: [{ path: "/authorize/menus/:method/:id", element: Menus }],
+
+        children: [{ path: "/authorize/menus/:method/:id" }],
       },
     ],
   },

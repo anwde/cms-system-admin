@@ -28,10 +28,11 @@ class App extends React.Component<{}, Server.Server, any> {
       this.setState({
         server: d.server,
       });
+      console.log("props=>", d.columns);
     });
   }
   /*--------------------------------------------------------------------------------
-    *  server 
+    *  get_is_auth 
   --------------------------------------------------------------------------------*/
 
   get_is_auth() {
@@ -48,6 +49,7 @@ class App extends React.Component<{}, Server.Server, any> {
     } else {
       webapi.init_store();
     } 
+   
     const params = webapi.utils.query();
     // params.test && webapi.cache.set("test", params.test);
     webapi.server();

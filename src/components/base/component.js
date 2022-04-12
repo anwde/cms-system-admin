@@ -25,7 +25,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
   /**
    * props 有变化
    */
-  UNSAFE_componentWillReceiveProps(props = {}) {
+  componentWillReceiveProps(props = {}) {
     //  console.log('props data=>',props);
     // this.props = props;
     const query = webapi.utils.query();
@@ -56,7 +56,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
   /**
    * 渲染前调用
    */
-  UNSAFE_componentWillMount() {
+  componentWillMount() {
     this.__handle_init();
   }
   /*----------------------1 other start----------------------*/

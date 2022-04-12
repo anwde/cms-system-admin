@@ -12,11 +12,13 @@ const defaultState = {
   version: "",
 };
 const reducer = (state = defaultState, action) => {
+ 
   let newState = { ...state };
   if (action.type === "LOADING") {
     newState.loading = action.state;
   }
   if (action.type === "SERVER") {
+    console.log("props=>",action.type,action.data.columns);
     newState.ucdata = action.data.ucdata;
     newState.columns = action.data.columns;
     newState.menus = action.data.menus;

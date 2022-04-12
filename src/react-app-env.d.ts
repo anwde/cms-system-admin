@@ -1,6 +1,6 @@
 /// <reference types="node" />
 /// <reference types="react" />
-/// <reference types="react-dom" /> 
+/// <reference types="react-dom" />
 declare namespace NodeJS {
   interface ProcessEnv {
     readonly NODE_ENV: "development" | "production" | "test";
@@ -76,10 +76,23 @@ declare module "*.less" {
 // @ts-ignore
 /* eslint-disable */
 declare namespace Server {
+  type Routes = {
+    path: string; 
+    Component?: React.LazyExoticComponent; 
+    //Component: React.LazyExoticComponent<React.FunctionComponent>
+    children?:[Routes]
+  };
+  type Ucdata = {
+    user_id?: number;
+    avatar?: string;
+    nickname?: string;
+    customer_id?: number;
+    client_id?: number;
+  };
   type Server = {
     is_auth?: Boolean;
     server: {
-      ucdata: {};
+      ucdata: Ucdata;
       columns: [];
       menus: [];
       loading: Boolean;
@@ -96,6 +109,33 @@ declare namespace Server {
     filters?: object;
     customerappid?: string;
   };
+  type Menus = {
+    id: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    url?: string;
+    name?: string;
+    intro?: string;
+    icon?: string;
+    style?: string;
+    group_id?: number;
+    parent_id?: number;
+    idx?: number;
+    update_time?: number;
+    create_time?: number;
+  }
+  type Menus_group = {
+    id: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number; 
+    name?: string;
+    allow?: string;
+    visibility?: number; 
+    update_time?: number;
+    create_time?: number;
+  }
   type Columns = {
     id: number;
     columns_id?: number;
@@ -201,14 +241,14 @@ declare namespace Server {
     create_time?: number;
   };
   type State = {
-    id:number;
+    id: number;
     data: {};
     lists: [];
-    q: string; 
+    q: string;
     order_field: string;
     method: string;
     order_value: any;
-    filters: any; 
+    filters: any;
     pagination: {
       showSizeChanger: boolean;
       hideOnSinglePage: boolean;

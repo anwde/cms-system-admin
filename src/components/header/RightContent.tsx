@@ -11,7 +11,7 @@ const GlobalHeaderRight: React.FC = () => {
       <Space className={className}>
       <NoticeIconView />
       <Menus />
-      <Avatar menu /> 
+      <Avatar/> 
       </Space>
     </>
   );
