@@ -9,8 +9,10 @@ import HeaderDropdown from "./HeaderDropdown";
 import styles from "./RightContent.module.less";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux"; 
-
-class AvatarDropdown extends React.Component {
+type State = { 
+  server: Server.Server;
+};
+class AvatarDropdown extends React.Component<{}, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -26,7 +28,7 @@ class AvatarDropdown extends React.Component {
     });
   }
   render() {
-    const state = this.state  as Server.Server;;
+    const state = this.state;
     const menuHeaderDropdown = (
       <Menu className={styles.menu} selectedKeys={[]}>
         <>
@@ -58,11 +60,11 @@ class AvatarDropdown extends React.Component {
           <Avatar
             size="small"
             className={styles.avatar}
-            src={state.server.ucdata.avatar}
+            src={state.server.ucdata&&state.server.ucdata.avatar}
             alt="avatar"
           />
           <span className={`${styles.name} anticon`}>
-            {state.server.ucdata.nickname}
+            {state.server.ucdata&&state.server.ucdata.nickname}
           </span>
         </span>
       </HeaderDropdown>

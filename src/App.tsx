@@ -6,7 +6,11 @@ import webapi from "./utils/webapi";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/lib/locale/zh_CN";
 import Loading from "./components/loading/loading";
-class App extends React.Component<{}, Server.Server, any> {
+type State = {
+  is_auth: boolean;
+  server: Server.Server;
+};
+class App extends React.Component<{}, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -48,22 +52,22 @@ class App extends React.Component<{}, Server.Server, any> {
       require("./test.js");
     } else {
       webapi.init_store();
-    } 
-   
+    }
+
     const params = webapi.utils.query();
     // params.test && webapi.cache.set("test", params.test);
     webapi.server();
     webapi.customizer.launch();
   }
   render() {
-    const state = this.state; 
-    // console.log("data=>", Routes, state); 
+    const state = this.state;
+    // console.log("data=>", Routes, state);
     return (
       <ConfigProvider locale={zhCN}>
         <Provider store={webapi.store}>
-          {state.server.loading ? <Loading /> : ""}
+          {state.server.loading ? <Loading /> : <></>}
           {state.server.code === 10000 || state.is_auth ? (
-          <IndexRoutes  />
+            <IndexRoutes />
           ) : (
             <Loading />
           )}

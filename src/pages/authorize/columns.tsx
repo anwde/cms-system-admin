@@ -24,7 +24,7 @@ import {
 } from "@ant-design/icons";
 import Basic_Component from "../../components/base/component";
 import ProTable from "@ant-design/pro-table";
-import type { ProColumns, ActionType } from "@ant-design/pro-table";
+import type { ProColumns } from "@ant-design/pro-table";
 
 
 import "@ant-design/pro-table/dist/table.css";

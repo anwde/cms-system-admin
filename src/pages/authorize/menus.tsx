@@ -7,14 +7,23 @@ import { withRouter } from "../../utils/router";
 import moment from "moment";
 import ProTable from "@ant-design/pro-table";
 import type { ProColumns } from "@ant-design/pro-table";
-import { Form, Input, Radio, Select, Table, Button, Cascader,Space } from "antd";
+import {
+  Form,
+  Input,
+  Radio,
+  Select,
+  Table,
+  Button,
+  Cascader,
+  Space,
+} from "antd";
 import {
   UploadOutlined,
   SettingFilled,
   DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import { FormInstance } from 'antd/lib/form';
+import { FormInstance } from "antd/lib/form";
 const BREADCRUMB = {
   title: "菜单管理",
   lists: [
@@ -26,15 +35,16 @@ const BREADCRUMB = {
     { title: "群组管理", url: "/authorize/menus/group" },
   ],
 };
-type Module_data <T = any>= {
-  [key: number]:T;
+type Module_data<T = any> = {
+  [key: number]: T;
 };
 type State = Server.State & {
-  menus_children?: []; 
-  group?:Module_data<Server.Menus_group>;
+  menus_children?: [];
+  group?: Module_data<Server.Menus_group>;
+  visibility: boolean;
 };
-class Menus extends Basic_Component { 
-  formRef: React.RefObject<FormInstance>=React.createRef<FormInstance>();
+class Menus extends Basic_Component {
+  formRef: React.RefObject<FormInstance> = React.createRef<FormInstance>();
   group = {};
   menus_children = [];
   constructor(props: any) {
@@ -49,10 +59,12 @@ class Menus extends Basic_Component {
    * 获取群组
    * @return obj
    */
-   async get_group(reset = false) {
+  async get_group(reset = false) {
     let group = this.group || {};
     if (reset || Object.keys(group).length === 0) {
-      let res = await webapi.request.get("authorize/menus/group",{data:{dict:1}});
+      let res = await webapi.request.get("authorize/menus/group", {
+        data: { dict: 1 },
+      });
       if (res.code === 10000) {
         group = res.lists;
       }
@@ -105,12 +117,14 @@ class Menus extends Basic_Component {
     });
     this.__breadcrumb(b);
   }
-  async __init_add_edit(action:string) {
-    let b = {title:''};
-    let data = {name:''};
+  async __init_add_edit(action: string) {
+    let b = { title: "" };
+    let data = { name: "" };
     if (action === "edit" && this.state.id) {
-      var res = await webapi.request.get("authorize/menus/get", {data:{
-        id: this.state.id}
+      var res = await webapi.request.get("authorize/menus/get", {
+        data: {
+          id: this.state.id,
+        },
       });
       if (res.code === 10000) {
         data = res.data;
@@ -125,6 +139,46 @@ class Menus extends Basic_Component {
     this.formRef.current && this.formRef.current.setFieldsValue({ ...data });
     this.__breadcrumb(b);
   }
+  /**
+   * group 列表数据
+   */
+  async __init_group(d = {}) {
+    var buttons = [
+      { title: "添加群组", url: "/menus/group_add" },
+      { title: "菜单管理", url: "/menus" },
+    ];
+    var title = `${BREADCRUMB.title}群组`;
+    this.init_lists("authorize/menus/group", d, { buttons, title });
+  }
+  __init_group_edit() {
+    this.__init_group_add_edit("edit");
+  }
+  __init_group_add() {
+    this.__init_group_add_edit("add");
+  }
+  async __init_group_add_edit(action: string) {
+    let b = { title: "" };
+    let data = { name: "" };
+    if (action === "edit" && this.state.id) {
+      var res = await webapi.request.get("authorize/menus/group_get", {
+        data: {
+          id: this.state.id,
+        },
+      });
+      if (res.code === 10000) {
+        data = res.data;
+      }
+      b.title = `${BREADCRUMB.title}-群组-${data.name}-编辑`;
+    } else {
+      b.title = `${BREADCRUMB.title}-群组-添加`;
+    }
+    this.setState({
+      data: data,
+    });
+    this.formRef.current && this.formRef.current.setFieldsValue({ ...data });
+    this.__breadcrumb(b);
+  }
+
   /*----------------------2 init end  ----------------------*/
 
   /*----------------------3 handle start  ----------------------*/
@@ -143,9 +197,9 @@ class Menus extends Basic_Component {
   /**
    * 提交
    **/
-  handle_submit = async (data:Server.Menus) => {
-    data.id = this.state.id; 
-    var res = await webapi.request.post("authorize/menus/dopost", {data});
+  handle_submit = async (data: Server.Menus) => {
+    data.id = this.state.id;
+    var res = await webapi.request.post("authorize/menus/dopost", { data });
     if (res.code === 10000) {
       webapi.message.success(res.message);
       this.props.history.replace("/authorize/menus");
@@ -157,7 +211,7 @@ class Menus extends Basic_Component {
   /**
    * 集中 删除
    **/
-  handle_do_delete(url:string, id:number) {
+  handle_do_delete(url: string, id: number) {
     this.__handle_delete({
       url: `authorize/menus/${url}`,
       data: { id },
@@ -167,21 +221,23 @@ class Menus extends Basic_Component {
    * 删除
    **/
 
-  handle_delete(id:number) {
+  handle_delete(id: number) {
     this.handle_do_delete("delete", id);
   }
   /**
    * 群组删除
    **/
-  handle_group_delete(id:number) {
+  handle_group_delete(id: number) {
     this.handle_do_delete("group_delete", id);
   }
   /**
    * 群组提交
    **/
-  handle_group_submit = async (data:Server.Menus_group) => {
+  handle_group_submit = async (data: Server.Menus_group) => {
     data.id = this.state.id;
-    var res = await webapi.request.post("authorize/menus/group_dopost", {data});
+    var res = await webapi.request.post("authorize/menus/group_dopost", {
+      data,
+    });
     if (res.code === 10000) {
       webapi.message.success(res.message);
       this.props.history.replace("/authorize/menus/group");
@@ -220,7 +276,7 @@ class Menus extends Basic_Component {
         render: (_, row) => {
           if (row.update_time && row.update_time > 0) {
             return moment(row.update_time * 1000).format("YYYY-MM-DD HH:mm:ss");
-          }else{
+          } else {
             return <></>;
           }
         },
@@ -233,16 +289,16 @@ class Menus extends Basic_Component {
         render: (_, row) => {
           if (row.create_time && row.create_time > 0) {
             return moment(row.create_time * 1000).format("YYYY-MM-DD HH:mm:ss");
-          }else{
+          } else {
             return <></>;
-          } 
+          }
         },
         align: "center",
       },
       {
         title: "操作",
         align: "center",
-        render: (_,row) => {
+        render: (_, row) => {
           return (
             <Space>
               <Button
@@ -258,7 +314,7 @@ class Menus extends Basic_Component {
               <Link to={`/authorize/menus/edit/${row.id}`}>
                 <Button type="primary" shape="circle" icon={<EditOutlined />} />
               </Link>
-            </Space>  
+            </Space>
           );
         },
       },
@@ -267,16 +323,17 @@ class Menus extends Basic_Component {
       <ProTable
         headerTitle="菜单管理"
         rowKey={"id"}
-        columns={columns} 
+        columns={columns}
         pagination={this.state.pagination}
         dataSource={this.state.lists}
         loading={this.props.server.loading}
-        onChange={this.__handle_table_change} 
+        onChange={this.__handle_table_change}
         toolBarRender={() => [
-          <Link to={'/authorize/menus/add'}>
-          <Button type="primary"shape="round" >
-            添加菜单
-          </Button></Link>,
+          <Link to={"/authorize/menus/add"}>
+            <Button type="primary" shape="round">
+              添加菜单
+            </Button>
+          </Link>,
         ]}
         search={{
           labelWidth: 120,
@@ -291,72 +348,194 @@ class Menus extends Basic_Component {
    * 添加-编辑 子类重写
    * @return obj
    */
-   __render_add_edit(u_action:string) { 
-     const state=this.state as State;
-      const menus_children =state.menus_children || [];
-      const group =state.group || {};
-      // console.log('d=>',this.props)
-      return (
-        <Form
-          ref={this.formRef}
-          onFinish={this.handle_submit}
-          {...this.__form_item_layout()}
-        >
-          <Form.Item name="name" label="名称">
-            <Input />
-          </Form.Item>
-          <Form.Item name="idx" label="序号">
-            <Input />
-          </Form.Item>
-          <Form.Item name="url" label="链接">
-            <Input />
-          </Form.Item>
-          <Form.Item name="icon" label="图标">
-            <Input />
-          </Form.Item>
-          <Form.Item name="style" label="样式">
-            <Input />
-          </Form.Item>
-          <Form.Item name="group_id" label="群组">
-            <Select>
+  __render_add_edit(u_action: string) {
+    const state = this.state as State;
+    const menus_children = state.menus_children || [];
+    const group = state.group || {};
+    // console.log('d=>',this.props)
+    return (
+      <Form
+        ref={this.formRef}
+        onFinish={this.handle_submit}
+        {...this.__form_item_layout()}
+      >
+        <Form.Item name="name" label="名称">
+          <Input />
+        </Form.Item>
+        <Form.Item name="idx" label="序号">
+          <Input />
+        </Form.Item>
+        <Form.Item name="url" label="链接">
+          <Input />
+        </Form.Item>
+        <Form.Item name="icon" label="图标">
+          <Input />
+        </Form.Item>
+        <Form.Item name="style" label="样式">
+          <Input />
+        </Form.Item>
+        <Form.Item name="group_id" label="群组">
+          <Select>
             {Object.entries(group).map(([key, val]) => {
-                  return (
-                    <Select.Option key={key} value={val.id}>
-                      {val.name}
-                    </Select.Option>
-                  );
-                })} 
-              
-            </Select>
-          </Form.Item>
-          <Form.Item label="所属">
-            <Cascader
-              options={menus_children}
-              fieldNames={{ label: "name", value: "id" }}
-              changeOnSelect
-              onChange={this.handle_parent_id}
-            />
-          </Form.Item>
-          <Form.Item name="intro" label="描述">
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item {...this.__tail_layout()}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              style={{ marginRight: "8px" }}
-              loading={this.props.server.loading}
-            >
-              {this.props.server.loading ? "正在提交" : "立即提交"}
-            </Button>
-            <Link className="button" to={"/authorize/menus"}>
-              返回
-            </Link>
-          </Form.Item>
-        </Form>
-      );
-    }
+              return (
+                <Select.Option key={key} value={val.id}>
+                  {val.name}
+                </Select.Option>
+              );
+            })}
+          </Select>
+        </Form.Item>
+        <Form.Item label="所属">
+          <Cascader
+            options={menus_children}
+            fieldNames={{ label: "name", value: "id" }}
+            changeOnSelect
+            onChange={this.handle_parent_id}
+          />
+        </Form.Item>
+        <Form.Item name="intro" label="描述">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item {...this.__tail_layout()}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            style={{ marginRight: "8px" }}
+            loading={this.props.server.loading}
+          >
+            {this.props.server.loading ? "正在提交" : "立即提交"}
+          </Button>
+          <Link className="button" to={"/authorize/menus"}>
+            返回
+          </Link>
+        </Form.Item>
+      </Form>
+    );
+  }
+  __render_group() {
+    const columns: ProColumns<Server.Menus_group>[] = [
+      {
+        title: "名称",
+        sorter: true,
+        fixed: "left",
+        dataIndex: "name",
 
+        align: "center",
+      },
+      {
+        title: "状态",
+        sorter: true,
+        fixed: "left",
+        dataIndex: "visibility",
+
+        align: "center",
+        render: function (field, data) {
+          return field === "1" ? "显示" : "隐藏";
+        },
+      },
+      {
+        title: "时间",
+        sorter: true,
+        dataIndex: "create_time",
+        render: function (_, row) {
+          if (row.create_time && row.create_time > 0) {
+            return moment(row.create_time * 1000).format("YYYY-MM-DD HH:mm:ss");
+          } else {
+            return <></>;
+          }
+        },
+
+        align: "center",
+      },
+      {
+        title: "操作",
+
+        align: "center",
+        render: (_, row) => {
+          return (
+            <Space>
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<DeleteOutlined />}
+                title="删除"
+                onClick={() => {
+                  this.handle_group_delete(row.id);
+                }}
+              />
+
+              <Link to={`/authorize/menus/group_edit/${row.id}`}>
+                <Button type="primary" shape="circle" icon={<EditOutlined />} />
+              </Link>
+            </Space>
+          );
+        },
+      },
+    ];
+    return (
+      <ProTable
+        rowKey="id"
+        columns={columns}
+        pagination={this.state.pagination}
+        dataSource={this.state.lists}
+        loading={this.props.server.loading}
+        onChange={this.__handle_table_change}
+      />
+    );
+  }
+  /**
+   * 编辑
+   * @return obj
+   */
+  __render_group_edit() {
+    return this.__render_group_add_edit();
+  }
+  /**
+   * 添加
+   * @return obj
+   */
+  __render_group_add() {
+    return this.__render_group_add_edit();
+  }
+  /**
+   * 添加、编辑
+   * @return obj
+   */
+  __render_group_add_edit() {
+    return (
+      <Form
+        ref={this.formRef}
+        onFinish={this.handle_group_submit}
+        {...this.__form_item_layout()}
+      >
+        <Form.Item name="name" label="名称">
+          <Input />
+        </Form.Item>
+        <Form.Item name="allow" label="链接">
+          <Input />
+        </Form.Item>
+        <Form.Item name="visibility" label="状态">
+          <Radio.Group>
+            <Radio value={1}>显示</Radio>
+            <Radio value={2}>隐藏</Radio>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item {...this.__tail_layout()}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            style={{ marginRight: "8px" }}
+            loading={this.props.server.loading}
+          >
+            {this.props.server.loading ? "正在提交" : "立即提交"}
+          </Button>
+          <Link className="button" to={"/authorize/menus/group"}>
+            返回
+          </Link>
+        </Form.Item>
+      </Form>
+    );
+  }
   /*----------------------4 render end  ----------------------*/
 }
 export default connect((store) => ({ ...store }))(withRouter(Menus));

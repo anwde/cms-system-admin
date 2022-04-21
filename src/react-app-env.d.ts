@@ -76,29 +76,33 @@ declare module "*.less" {
 // @ts-ignore
 /* eslint-disable */
 declare namespace Server {
+  type Breadcrumb = {
+    title?: string;
+    lists?: [];
+    buttons?: [];
+  };
   type Routes = {
-    path: string; 
-    Component?: React.LazyExoticComponent; 
+    path: string;
+    Component?: React.LazyExoticComponent;
     //Component: React.LazyExoticComponent<React.FunctionComponent>
-    children?:[Routes]
+    children?: [Routes];
   };
   type Ucdata = {
     user_id?: number;
     avatar?: string;
     nickname?: string;
+    mobile?: string;
     customer_id?: number;
     client_id?: number;
   };
   type Server = {
     is_auth?: Boolean;
-    server: {
-      ucdata: Ucdata;
-      columns: [];
-      menus: [];
-      loading: Boolean;
-      code: number;
-      version: string;
-    };
+    ucdata?: Ucdata;
+    columns?: [];
+    menus?: [];
+    loading?: Boolean;
+    code?: number;
+    version?: string;
   };
   type Query = {
     order_field?: string;
@@ -124,18 +128,66 @@ declare namespace Server {
     idx?: number;
     update_time?: number;
     create_time?: number;
-  }
+  };
+
   type Menus_group = {
     id: number;
     customer_id?: number;
     client_id?: number;
-    state_delete?: number; 
+    state_delete?: number;
     name?: string;
     allow?: string;
-    visibility?: number; 
+    visibility?: number;
     update_time?: number;
     create_time?: number;
-  }
+  };
+  type Competence = {
+    id: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    name?: string;
+    permission?: [];
+    menus?: [];
+    columns?: [];
+    total?: number;
+    state?: number;
+    update_time?: number;
+    create_time?: number;
+  };
+  type Competence_user = Ucdata&{
+    id: number;
+    state_delete?: number;
+    competence_id?: number;
+    user_id?: number;
+    update_time?: number;
+    create_time?: number;
+  };
+
+  type Permission = {
+    id: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    url?: string;
+    name?: string;
+    group_id?: number;
+    parent_id?: number;
+    update_time?: number;
+    create_time?: number;
+  };
+
+  type Permission_group = {
+    id: number;
+    customer_id?: number;
+    client_id?: number;
+    state_delete?: number;
+    name?: string;
+    allow?: string;
+    visibility?: number;
+    update_time?: number;
+    create_time?: number;
+  };
   type Columns = {
     id: number;
     columns_id?: number;

@@ -1,9 +1,9 @@
 import React from "react";
 const Account = React.lazy(() => import("../pages/authorize/account"));
-const Columns = React.lazy(() => import("../pages/authorize/columns"));
+const Columns = React.lazy(() => import("../pages/authorize/columns")); 
 const Menus = React.lazy(() => import("../pages/authorize/menus"));
-const Competence = React.lazy(() => import("../pages/authorize/menus"));
-const Permission = React.lazy(() => import("../pages/authorize/menus"));
+const Competence = React.lazy(() => import("../pages/authorize/competence"));
+const Permission = React.lazy(() => import("../pages/authorize/permission"));
 
 let routes: Server.Routes[] = [
   {

@@ -3,7 +3,7 @@ import webapi from "../../utils/webapi";
 import store from "../../redux/store";
 import type { TablePaginationConfig } from "antd";
 interface NavigationBarProps {
-  server: { loading: boolean };
+  server: { loading: boolean, };
   match: {
     params: Object,
   };
@@ -195,7 +195,7 @@ merger = (...opts) => {
    * init_state 初始化状态 2=init
    * @return obj
    */
-  __init_state():Server.State {
+  __init_state() {
     const query = webapi.utils.query();
     const params = this.__get_params(); 
     return  {
@@ -281,12 +281,12 @@ merger = (...opts) => {
    *  业务初始化前 子类可重写
    * @return obj
    */
-  __handle_init_before = () => {};
+  __handle_init_before () {};
   /**
    *  业务初始化后 子类可重写
    * @return obj
    */
-  __handle_init_after = () => {};
+  __handle_init_after(){};
 
   /**
    * 改变 分页

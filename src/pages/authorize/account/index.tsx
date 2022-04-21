@@ -13,7 +13,7 @@ import Notification from "./notification";
 
 type State = Server.State & {
   mode: "inline" | "horizontal";
-};
+} ;
 class Account extends Basic_Component {
   menuMap: Record<string, React.ReactNode> = {
     index: "基本设置",
@@ -59,7 +59,7 @@ class Account extends Basic_Component {
       );
   }
   render() {
-    const state = this.state as State;
+    const state = this.state as unknown as State;
     const menus = this.menuMap;
     console.log(state);
     return (
