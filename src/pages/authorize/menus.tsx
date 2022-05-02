@@ -2,8 +2,7 @@ import React from "react";
 import Basic_Component from "../../components/base/component";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import webapi from "../../utils/webapi";
-import { withRouter } from "../../utils/router";
+import webapi from "../../utils/webapi"; 
 import moment from "moment";
 import ProTable from "@ant-design/pro-table";
 import type { ProColumns } from "@ant-design/pro-table";
@@ -349,7 +348,7 @@ class Menus extends Basic_Component {
    * @return obj
    */
   __render_add_edit(u_action: string) {
-    const state = this.state as State;
+    const state = this.state as unknown as State;
     const menus_children = state.menus_children || [];
     const group = state.group || {};
     // console.log('d=>',this.props)
@@ -538,4 +537,4 @@ class Menus extends Basic_Component {
   }
   /*----------------------4 render end  ----------------------*/
 }
-export default connect((store) => ({ ...store }))(withRouter(Menus));
+export default connect((store) => ({ ...store }))((Menus));

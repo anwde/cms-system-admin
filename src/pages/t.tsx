@@ -2,8 +2,7 @@ import React from "react";
 import Basic_Component from "../components/base/component";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import webapi from "../utils/webapi";
-import { withRouter } from "../utils/router";
+import webapi from "../utils/webapi"; 
 import moment from "moment";
 class Menus extends Basic_Component {
   constructor(props: any) {
@@ -29,4 +28,4 @@ class Menus extends Basic_Component {
 
   /*----------------------4 render end  ----------------------*/
 }
-export default connect((store) => ({ ...store }))(withRouter(Menus));
+export default connect((store) => ({ ...store }))(Menus);

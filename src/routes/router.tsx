@@ -8,17 +8,19 @@ const Permission = React.lazy(() => import("../pages/authorize/permission"));
 let routes: Server.Routes[] = [
   {
     path: "/authorize/account",
-    Component: Account,
+    component: Account,
     children: [
       {
         path: "/authorize/account/:method",
-        children: [{ path: "/authorize/account/:method/:id" }],
+        children: [
+          { path: "/authorize/account/:method/:id" }
+        ],
       },
     ],
   },
   {
     path: "/authorize/columns",
-    Component: Columns,
+    component: Columns,
     children: [
       {
         path: "/authorize/columns/:method",
@@ -28,7 +30,7 @@ let routes: Server.Routes[] = [
   },
   {
     path: "/authorize/competence",
-    Component: Competence,
+    component: Competence,
     children: [
       {
         path: "/authorize/competence/:method",
@@ -39,7 +41,7 @@ let routes: Server.Routes[] = [
   },
   {
     path: "/authorize/permission",
-    Component: Permission,
+    component: Permission,
     children: [
       {
         path: "/authorize/permission/:method",
@@ -50,7 +52,7 @@ let routes: Server.Routes[] = [
   },
   {
     path: "/authorize/menus",
-    Component: Menus,
+    component: Menus,
     children: [
       {
         path: "/authorize/menus/:method",

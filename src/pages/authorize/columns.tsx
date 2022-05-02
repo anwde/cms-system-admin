@@ -15,6 +15,7 @@ import {
   Tree,
   Drawer,
   Space,
+  Modal,
 } from "antd";
 import {
   UploadOutlined,
@@ -22,14 +23,15 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import Basic_Component from "../../components/base/component";
+import Icon, * as Icons from "@ant-design/icons";
+import Basic_Authorize from "./basic_authorize";
+import classnames from "classnames";
 import ProTable from "@ant-design/pro-table";
 import type { ProColumns } from "@ant-design/pro-table";
-
-
 import "@ant-design/pro-table/dist/table.css";
-import { withRouter } from "../../utils/router";
-import { FormInstance } from 'antd/lib/form';
+import { FormInstance } from "antd/lib/form";
+import styles from "./columns.module.less";
+console.log("icons=>", Icons);
 const BREADCRUMB = {
   title: "栏目组件",
   lists: [
@@ -48,14 +50,16 @@ type Module = {
 };
 type State = Server.State & {
   columns_children?: [];
-  module: Module;
-  data: Server.Columns;
-  u_action: string;
-  drawer_visible: boolean;
+  module?: Module;
+  data?: Server.Columns;
+  u_action?: string;
+  drawer_visible?: boolean;
+  icon_visible?: boolean;
+  icon?: string;
 };
-const Default_Module={ model: {}, templates: {}, types: {} };
-class Columns extends Basic_Component {
-  formRef: React.RefObject<FormInstance>=React.createRef<FormInstance>();
+const Default_Module = { model: {}, templates: {}, types: {} };
+class Columns extends Basic_Authorize<{}, State> {
+  formRef: React.RefObject<FormInstance> = React.createRef<FormInstance>();
   columns_children = [];
   module: Module = Default_Module;
   data = { id: 0, name: "" };
@@ -64,7 +68,7 @@ class Columns extends Basic_Component {
    */
   constructor(props: any) {
     super(props);
-    console.log('props=>',props);
+    // console.log('props=>',props);
     // this.state = this.__init_state() as State;
     // this.formRef = React.createRef<FormInstance>();
   }
@@ -246,15 +250,15 @@ class Columns extends Basic_Component {
   /**
    * 提交
    **/
-  handle_submit = async (data: Server.Columns) => { 
+  handle_submit = async (data: Server.Columns) => {
     const state = this.state;
     data.id = state.id;
     data.image = data.image;
-    var res = await webapi.request.post('authorize/columns/dopost', { data });
+    var res = await webapi.request.post("authorize/columns/dopost", { data });
     if (res.code === 10000) {
       this.get_children(true);
-      webapi.message.success(res.message); 
-      this.props.history.replace('/authorize/columns');
+      webapi.message.success(res.message);
+      this.props.history.replace("/authorize/columns");
     } else {
       webapi.message.error(res.message);
     }
@@ -352,6 +356,29 @@ class Columns extends Basic_Component {
     });
     // console.log(data);
     this.formRef.current && this.formRef.current.setFieldsValue({ ...data });
+  };
+  handle_icon_show = () => {
+    const state = this.state as State;
+    this.setState({ icon_visible: true,icon:state.data.icon });
+  };
+  handle_icon_clos = () => {
+    this.setState({ icon_visible: false });
+  };
+  handle_icon_confirm = () => {
+    const state = this.state as State;
+    if (state.icon && this.formRef.current) {
+      const data = {
+        ...this.state.data,
+        ...this.formRef.current.getFieldsValue(),
+        icon: state.icon,
+      };
+      this.setState({ data });
+      this.formRef.current.setFieldsValue({ ...data });
+    }
+    this.handle_icon_clos();
+  };
+  handle_icon_select = (icon: string) => {
+    this.setState({ icon });
   };
   /*----------------------3 handle end  ----------------------*/
 
@@ -495,7 +522,7 @@ class Columns extends Basic_Component {
       <ProTable
         headerTitle="查询表格"
         rowKey={"id"}
-        columns={columns} 
+        columns={columns}
         pagination={this.state.pagination}
         dataSource={this.state.lists}
         loading={this.props.server.loading}
@@ -522,17 +549,47 @@ class Columns extends Basic_Component {
   __render_add_edit_children(u_action: string) {
     const state = this.state as State;
     const data = state.data;
-    const module = state.module; 
+    const module = state.module;
     const templates = module.templates;
     const types = module.types;
     const model = module.model;
     const columns_children = state.columns_children;
     // console.log('templates',(templates))
     // Object.entries(templates).map(([key, val]) => {
-    //   console.log('templates',val) 
+    //   console.log('templates',val)
     // });
     return (
       <>
+        <Modal
+          title="请选择图标"
+          visible={state.icon_visible}
+          onOk={this.handle_icon_confirm}
+          onCancel={this.handle_icon_clos}
+        >
+          <div className={styles.content_article}>
+            <ul className={styles.ul}>
+              {Object.entries(Icons).map(([key, val]) => {
+                if (typeof val == "function") {
+                  return;
+                }
+                return (
+                  <li
+                    key={key}
+                    className={classnames(styles.li,state.icon===key?styles.hover:"")}
+                    onClick={() => {
+                      this.handle_icon_select(key);
+                    }}
+                  >
+                    <Icon component={Icons[key]} className={styles.anticon} />
+                    <span className={styles.anticon_class}>
+                      <span className="ant-badge"> {key}</span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </Modal>
         <Tabs defaultActiveKey="1">
           <Tabs.TabPane tab="基本选项" key="1">
             <Form.Item name="name" label="名称">
@@ -565,7 +622,15 @@ class Columns extends Basic_Component {
               <Input />
             </Form.Item>
             <Form.Item name="icon" label="图标">
-              <Input />
+              <Button
+                type="primary"
+                shape="circle"
+                size="large"
+                icon={<Icon component={Icons[data.icon]}  style={{fontSize:30}}/>}
+                onClick={() => {
+                  this.handle_icon_show();
+                }}
+              />
             </Form.Item>
             <Form.Item name="type" label="类型">
               <Select>
@@ -779,4 +844,4 @@ class Columns extends Basic_Component {
   }
   /*----------------------4 render end  ----------------------*/
 }
-export default connect((store) => ({ ...store }))(withRouter(Columns));
+export default connect((store) => ({ ...store }))(Columns);

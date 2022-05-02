@@ -49,7 +49,7 @@ export default class Basic_Authorize<P = {}, S = {}, SS = any> extends Basic_Com
     d.row_count = this.state.pagination.pageSize;
     d.offset = this.state.pagination.current;
     d.q = this.state.q;
-    var data = await webapi.request.get(url, d);
+    var data = await webapi.request.get(url, {data:d});
     var lists = [];
     if (data.code === 10000 && data.num_rows > 0) {
       lists = data.lists;

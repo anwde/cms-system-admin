@@ -1,5 +1,4 @@
-import React from "react";
-import { withRouter } from "../../../utils/router";
+import React from "react"; 
 import { connect } from "react-redux";
 import Basic_Component from "../../../components/base/component";
 import { Menu } from "antd";
@@ -30,6 +29,13 @@ class Account extends Basic_Component {
       mode: "inline",
     };
   }
+  __init_index=()=>{
+    console.log('state=>',this.state);
+  }
+  __init_security=()=>{
+    console.log('state=>',this.state);
+  }
+  
   __render_index() {
     return (
       <>
@@ -61,7 +67,7 @@ class Account extends Basic_Component {
   render() {
     const state = this.state as unknown as State;
     const menus = this.menuMap;
-    console.log(state);
+   
     return (
       <GridContent>
         <div className={styles.main}>
@@ -83,4 +89,4 @@ class Account extends Basic_Component {
     );
   }
 }
-export default connect((store) => ({ ...store }))(withRouter(Account));
+export default connect((store) => ({ ...store }))((Account));

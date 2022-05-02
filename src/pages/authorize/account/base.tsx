@@ -9,6 +9,8 @@ import ProForm, {
   ProFormTextArea,
 } from "@ant-design/pro-form";
 import styles from "./base.module.less";
+import { useSelector, useDispatch } from 'react-redux'
+import { Server } from "tls";
 
 const validatorPhone = (
   rule: any,
@@ -45,6 +47,8 @@ const BaseView: React.FC = () => {
   const handleFinish = async () => {
     message.success("更新基本信息成功");
   };
+  const {ucdata} = useSelector((state:Server.Props) => state.server );
+  console.log('ucdata',ucdata)
   return (
     <div className={styles.baseView}>
       <div className={styles.left}>
@@ -61,20 +65,9 @@ const BaseView: React.FC = () => {
               children: "更新基本信息",
             },
           }}
-          initialValues={{}}
+          initialValues={{name:ucdata.nickname}}
           hideRequiredMark
         >
-          <ProFormText
-            width="md"
-            name="email"
-            label="邮箱"
-            rules={[
-              {
-                required: true,
-                message: "请输入您的邮箱!",
-              },
-            ]}
-          />
           <ProFormText
             width="md"
             name="name"
@@ -86,6 +79,18 @@ const BaseView: React.FC = () => {
               },
             ]}
           />
+          <ProFormText
+            width="md"
+            name="email"
+            label="邮箱"
+            rules={[
+              {
+                required: true,
+                message: "请输入您的邮箱!",
+              },
+            ]}
+          />
+          
           <ProFormTextArea
             name="profile"
             label="个人简介"
@@ -180,7 +185,7 @@ const BaseView: React.FC = () => {
         </ProForm>
       </div>
       <div className={styles.right}>
-        <AvatarView avatar={""} />
+        <AvatarView avatar={ucdata.avatar} />
       </div>
     </div>
   );

@@ -2,8 +2,7 @@ import React from "react";
 import Basic_Authorize from "./basic_authorize";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import webapi from "../../utils/webapi";
-import { withRouter } from "../../utils/router";
+import webapi from "../../utils/webapi"; 
 import { Form, Input, Tree, Space, Button, Drawer, Avatar } from "antd";
 import { 
   UserSwitchOutlined,
@@ -470,7 +469,7 @@ class Competence extends Basic_Authorize<{},State> {
    * 渲染 首页
    **/
   __render_index() {
-    const state = this.state as State;
+    const state = this.state as unknown as  State;
     const server = this.props.server;
     const customer = state.customer;
     const applications = state.applications;
@@ -640,7 +639,7 @@ class Competence extends Basic_Authorize<{},State> {
    * @return obj
    */
   __render_add_edit(u_action:string) {
-    const state =this.state as State;
+    const state =this.state as unknown as State;
     const data=state.data as Server.Competence
     console.log('data=>',state)
     return (
@@ -694,4 +693,4 @@ class Competence extends Basic_Authorize<{},State> {
 
   /*----------------------4 render end  ----------------------*/
 }
-export default connect((store) => ({ ...store }))(withRouter(Competence));
+export default connect((store) => ({ ...store }))((Competence));

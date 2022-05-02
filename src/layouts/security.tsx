@@ -1,5 +1,4 @@
-import React, { useState, lazy, useEffect } from "react";
-import { Button, Descriptions, Result, Avatar, Space, Statistic } from "antd";
+import React, { useState, lazy, useEffect, Suspense } from "react";
 import { LikeOutlined, UserOutlined } from "@ant-design/icons";
 import "@/App.css";
 import type { ProSettings } from "@ant-design/pro-layout";
@@ -11,51 +10,48 @@ import defaultProps from "./_defaultProps";
 import routers from "../routes/router";
 import webapi from "../utils/webapi";
 import { RightContent } from "../components/header/index";
-import { Outlet, Route, Routes, useParams } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import Loading from "../components/loading/loading";
 import type { MenuDataItem } from "@ant-design/pro-layout";
 import { Link } from "react-router-dom";
-const Columns = lazy(() => import("../pages/authorize/columns"));
-const Account = lazy(() => import("../pages/authorize/account"));
-const content = (
-  <Descriptions size="small" column={2}>
-    <Descriptions.Item label="创建人">张三</Descriptions.Item>
-    <Descriptions.Item label="联系方式">
-      <a>421421</a>
-    </Descriptions.Item>
-    <Descriptions.Item label="创建时间">2017-01-10</Descriptions.Item>
-    <Descriptions.Item label="更新时间">2017-10-10</Descriptions.Item>
-    <Descriptions.Item label="备注">中国</Descriptions.Item>
-  </Descriptions>
-);
-const loopMenuItem = (columns: []): MenuDataItem[] =>{
-  console.log("props=>", columns);
+import { useSelector } from "react-redux";
+import Icon, * as Icons from "@ant-design/icons";
+const loopMenuItem = (
+  columns: [],
+  is_children: boolean = false
+): MenuDataItem[] => {
+  // console.log("props=>", LikeOutlined);
   return columns.map(({ icon, children, name, url }) => ({
-    name, 
-    icon,
+    name,
+    icon: icon ? <Icon component={Icons[icon]} /> : "",
     path: url,
-    routes: children && loopMenuItem(children),
+    routes: children && loopMenuItem(children, true),
   }));
-}
-  ;
-const Layout1 = () => {
+};
+
+const Irouters = (Server_routes: Server.Routes[]) => {
+  let r = [];
+  const rs = (routes: Server.Routes[], pprop: Server.Routes = { path: "" }) => {
+    routes.map((prop, key) => {
+      let { component, path } = prop;
+      if (!component && pprop.component) {
+        component = prop.component = pprop.component;
+      }
+      if (prop.children) {
+        rs(prop.children, prop);
+      }
+      r.push(<Route path={path} key={key} component={component}></Route>);
+    });
+  };
+  rs(Server_routes);
+  return r;
+};
+const Layout = () => {
   const [settings, setSetting] = useState<Partial<ProSettings> | undefined>({
     fixSiderbar: true,
   });
-  const [server, setServer] = useState<{columns:[]}>({columns:[]});
-
   const [pathname, setPathname] = useState("/welcome");
-  const p = useParams();
-  console.log("Params=>", p);
-  useEffect(() => {
-    console.log("props=>", server.columns);
-    webapi.store.subscribe(() => {
-      const d = webapi.store.getState();
-      setServer(d.server);
-      console.log("props=>", server.columns);
-    });
-  },[]);
-  // server?.server?.columns
+  const { columns } = useSelector((state: Server.Props) => state.server);
   return (
     <>
       <ProLayout
@@ -64,7 +60,7 @@ const Layout1 = () => {
         location={{
           pathname,
         }}
-        menu={{ request: async () => loopMenuItem(server.columns) }}
+        menu={{ request: async () => loopMenuItem(columns || []) }}
         onMenuHeaderClick={(e) => console.log(e)}
         menuItemRender={(item, dom) => {
           return (
@@ -81,17 +77,17 @@ const Layout1 = () => {
         rightContentRender={() => <RightContent />}
         {...settings}
       >
-         
-          <div
-            style={{
-              height: "120vh",
-            }}
-          >
-            <Outlet />
-          </div>
-         
+        <div
+          style={{
+            height: "120vh",
+          }}
+        >
+          <Suspense fallback={<Loading />}>
+            <Switch>{Irouters(routers)}</Switch>
+          </Suspense>
+        </div>
       </ProLayout>
-      <SettingDrawer
+      {/* <SettingDrawer
         pathname={pathname}
         enableDarkTheme
         getContainer={() => document.getElementById("container")}
@@ -100,64 +96,8 @@ const Layout1 = () => {
           setSetting(changeSetting);
         }}
         disableUrlParams={false}
-      />
+      /> */}
     </>
   );
 };
-
-const Irouters = (
-  routes: Server.Routes[],
-  pprop: Server.Routes = { path: "" }
-) => {
-  console.log("useParams=>", useParams());
-  return routes.map((prop, key) => {
-    let { Component, path } = prop;
-    if (!Component && pprop.Component) {
-      Component = prop.Component = pprop.Component;
-    }
-    // console.log("Component", Component);
-    return (
-      <Route
-        path={path}
-        key={key}
-        element={
-          <React.Suspense fallback={<Loading />}>
-            <Component />
-          </React.Suspense>
-        }
-      >
-        {prop.children ? Irouters(prop.children, prop) : ""}
-      </Route>
-    );
-  });
-};
-const Security = () => {
-  const Element_Columns = (
-    <React.Suspense fallback={<>...</>}>
-      <Columns />
-    </React.Suspense>
-  );
-  // useEffect(()=>{
-  // console.log("useParams=>", useParams());
-  // },[])
-  console.log("useParams=>", useParams());
-  return (
-    <React.Suspense fallback={<>...</>}>
-      <Routes>
-        <Route path="/" element={<Layout1 />}>
-          <Route path="/authorize/columns" element={Element_Columns}>
-            <Route path="/authorize/columns/:method" element={Element_Columns}>
-              <Route
-                path="/authorize/columns/:method/:id"
-                element={Element_Columns}
-              />
-            </Route>
-          </Route>
-          {Irouters(routers)}
-        </Route>
-      </Routes>
-    </React.Suspense>
-  );
-};
-
-export default Security;
+export default Layout;

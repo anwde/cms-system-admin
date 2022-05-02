@@ -1,11 +1,14 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import React,{Suspense} from "react";
+import { BrowserRouter, Router, Switch} from "react-router-dom";
 import { Provider } from "react-redux";
 import IndexRoutes from "./routes/index";
+import { PrivateRoute } from "./routes/private_routes";
+import { createBrowserHistory } from "history";
 import webapi from "./utils/webapi";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/lib/locale/zh_CN";
 import Loading from "./components/loading/loading";
+const History = createBrowserHistory({ basename: "/" });
 type State = {
   is_auth: boolean;
   server: Server.Server;
@@ -32,7 +35,7 @@ class App extends React.Component<{}, State> {
       this.setState({
         server: d.server,
       });
-      console.log("props=>", d.columns);
+      console.log("props=>", d);
     });
   }
   /*--------------------------------------------------------------------------------
@@ -67,7 +70,23 @@ class App extends React.Component<{}, State> {
         <Provider store={webapi.store}>
           {state.server.loading ? <Loading /> : <></>}
           {state.server.code === 10000 || state.is_auth ? (
-            <IndexRoutes />
+            
+            <Suspense fallback={<Loading />}>
+            <Router history={History}>
+              <Switch>
+              {IndexRoutes.map((prop, key) => {
+                  return ( 
+                    <PrivateRoute
+                      path={prop.path}
+                      key={key}
+                      component={prop.component}
+                    />
+                  );
+                })}
+              </Switch>
+            </Router>
+            </Suspense>
+
           ) : (
             <Loading />
           )}

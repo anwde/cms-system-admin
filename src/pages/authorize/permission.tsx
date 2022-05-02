@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Basic_Authorize from "./basic_authorize";
 import webapi from "../../utils/webapi";
-import { withRouter } from "../../utils/router";
 import moment from "moment";
 import type { ProColumns } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
@@ -32,14 +31,16 @@ const BREADCRUMB = {
 type Module_data<T = any> = {
   [key: number]: T;
 };
-type State ={
+type State = {
   menus_children?: [];
   group?: Module_data<Server.Permission_group>;
   visibility?: boolean;
   permission_children?: [];
-  children:[];
+  children?: [];
+  u_action?: string;
+  drawer_visible?: boolean;
 };
-class Permission extends Basic_Authorize<{},State>  {
+class Permission extends Basic_Authorize<{}, State> {
   formRef: React.RefObject<FormInstance> = React.createRef<FormInstance>();
   group = {};
   permission_children = [];
@@ -47,8 +48,8 @@ class Permission extends Basic_Authorize<{},State>  {
   /**
    * 构造
    */
-   constructor(props: any) {
-    super(props); 
+  constructor(props: any) {
+    super(props);
   }
   /**
    * 面包屑导航
@@ -94,14 +95,14 @@ class Permission extends Basic_Authorize<{},State>  {
    * @return obj
    */
   async get_permission_children(reset = false) {
-    var data = this.permission_children || {};
+    let data = this.permission_children || {};
     if (reset || Object.keys(data).length === 0) {
-      var res = await webapi.request.get("authorize/permission/children");
+      const res = await webapi.request.get("authorize/permission/children");
       if (res.code === 10000) {
         data = res.lists;
       }
     }
-    this.permission_children = data;
+    this.permission_children = data as [];
     return this.permission_children;
   }
   /**
@@ -379,7 +380,7 @@ class Permission extends Basic_Authorize<{},State>  {
    * 渲染 首页
    **/
   __render_index(): JSX.Element {
-    const state = this.state as State;
+    const state = this.state as unknown as State;
     const group = state.group || {};
     const columns: ProColumns<Server.Permission>[] = [
       {
@@ -414,6 +415,7 @@ class Permission extends Basic_Authorize<{},State>  {
           return group[i] ? group[i]["name"] : "--";
         },
         align: "center",
+        search: false,
       },
       {
         title: "时间",
@@ -427,12 +429,22 @@ class Permission extends Basic_Authorize<{},State>  {
           }
         },
         align: "center",
+        valueType: "dateRange",
+        search: {
+          transform: (value) => {
+            return {
+              start_time: value[0],
+              end_time: value[1],
+            };
+          },
+        },
       },
       {
         title: "操作",
         align: "center",
         fixed: "right",
         width: 140,
+        search: false,
         render: (_, row) => {
           return (
             <Space>
@@ -461,7 +473,25 @@ class Permission extends Basic_Authorize<{},State>  {
         pagination={this.state.pagination}
         dataSource={this.state.lists}
         loading={this.props.server.loading}
-        onChange={this.__handle_table_change}
+        // onChange={this.__handle_table_change}
+        request={async (params = {}, sorts, filter) => {
+          
+          let filters = webapi.utils.deepclone(params);
+          const s = Object.keys(sorts);
+          let field = "";
+          let order = "";
+          if (s.length > 0) {
+            field = s[0];
+            order = sorts[field];
+          }
+          delete(filters.current);
+          delete(filters.pageSize); 
+          this.__handle_table_change(params, {...filter,...filters}, { field, order });
+          return [];
+        }}
+        search={{
+          labelWidth: "auto",
+        }}
       />
     );
   }
@@ -470,7 +500,7 @@ class Permission extends Basic_Authorize<{},State>  {
    * @return obj
    */
   __render_add_edit_children(u_action: string) {
-    const state = this.state as State;
+    const state = this.state as unknown as State;
     return (
       <>
         <Form.Item name="id" label="ID" hidden>
@@ -554,7 +584,7 @@ class Permission extends Basic_Authorize<{},State>  {
         title: "时间",
         sorter: true,
         dataIndex: "create_time",
-        render:  (_, row)=> {
+        render: (_, row) => {
           return row.create_time && row.create_time > 0 ? (
             moment(row.create_time * 1000).format("YYYY-MM-DD HH:mm:ss")
           ) : (
@@ -591,7 +621,7 @@ class Permission extends Basic_Authorize<{},State>  {
     ];
     return (
       <ProTable
-        headerTitle="菜单管理"
+        headerTitle="群组管理"
         rowKey={"id"}
         columns={columns}
         pagination={this.state.pagination}
@@ -659,7 +689,8 @@ class Permission extends Basic_Authorize<{},State>  {
     );
   }
   __render_children() {
-    const children = this.state.children || [];
+    const state = this.state as unknown as State;
+    const children = state.children || [];
     return (
       <>
         <Tree
@@ -669,15 +700,15 @@ class Permission extends Basic_Authorize<{},State>  {
           blockNode
           onDragEnd={this.handle_drag_end}
           onDrop={this.handle_drop}
-          onSelect={this.handle_select}
+          // onSelect={this.handle_select}
           treeData={children}
         />
         <Drawer
-          title={(this.state.u_action === "add" ? "添加" : "编辑") + "权限"}
+          title={(state.u_action === "add" ? "添加" : "编辑") + "权限"}
           width={500}
           forceRender={true}
           onClose={this.handle_drawer_close}
-          visible={this.state.drawer_visible}
+          visible={state.drawer_visible}
           bodyStyle={{ paddingBottom: 80 }}
           footer={
             <div
@@ -694,7 +725,7 @@ class Permission extends Basic_Authorize<{},State>  {
               </Button>
               <Button
                 shape="round"
-                loading={this.props.loading}
+                loading={this.props.server.loading}
                 type="primary"
                 onClick={this.handle_drawer_submit}
               >
@@ -704,7 +735,7 @@ class Permission extends Basic_Authorize<{},State>  {
           }
         >
           <Form ref={this.formRef} onFinish={this.handle_submit}>
-            {this.__render_add_edit_children(this.state.u_action)}
+            {this.__render_add_edit_children(state.u_action)}
           </Form>
         </Drawer>
       </>
@@ -712,4 +743,4 @@ class Permission extends Basic_Authorize<{},State>  {
   }
   /*----------------------4 render end  ----------------------*/
 }
-export default connect((store) => ({ ...store }))(withRouter(Permission));
+export default connect((store) => ({ ...store }))(Permission);

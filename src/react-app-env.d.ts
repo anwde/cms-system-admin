@@ -1,6 +1,7 @@
 /// <reference types="node" />
 /// <reference types="react" />
 /// <reference types="react-dom" />
+ 
 declare namespace NodeJS {
   interface ProcessEnv {
     readonly NODE_ENV: "development" | "production" | "test";
@@ -81,9 +82,10 @@ declare namespace Server {
     lists?: [];
     buttons?: [];
   };
+
   type Routes = {
     path: string;
-    Component?: React.LazyExoticComponent;
+    component?: React.LazyExoticComponent;
     //Component: React.LazyExoticComponent<React.FunctionComponent>
     children?: [Routes];
   };
@@ -103,6 +105,9 @@ declare namespace Server {
     loading?: Boolean;
     code?: number;
     version?: string;
+  };
+  type Props={
+    server?:Server;
   };
   type Query = {
     order_field?: string;

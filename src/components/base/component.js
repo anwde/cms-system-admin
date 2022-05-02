@@ -26,8 +26,8 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * props 有变化
    */
   componentWillReceiveProps(props = {}) {
-    //  console.log('props data=>',props);
-    // this.props = props;
+    //  console.log('props=>',props);
+    this.props = props;
     const query = webapi.utils.query();
     const q = query.q || "";
     const params = this.__get_params();
@@ -101,7 +101,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
     }
   }
   __get_params(): {} {
-    return this.props.params;
+    return this.props.match.params;
   }
   __get_base64(img: any, callback: any) {
     const reader = new FileReader();
@@ -118,6 +118,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
 
   __tail_layout = () => {
     return {
+      onValuesChange:this.__handle_values_change,		
       wrapperCol: { offset: 4, span: 14 },
     };
   };
@@ -267,7 +268,9 @@ merger = (...opts) => {
   /*----------------------2 init end  ----------------------*/
 
   /*----------------------3 handle start----------------------*/
-
+  __handle_values_change=(k:any,v:any)=>{
+    console.log('val=>',k,v)
+  }
   /**
    * handle_init 业务初始化 3=handle
    * @return obj
@@ -307,14 +310,24 @@ merger = (...opts) => {
         if (!(method in this)) {
           console.warn("__handle_page_change 方法:" + method + "不存在");
         } else {
+          let filters=[];
           const urlParams = new URL(window.location.href);
           const params = webapi.utils.query();
           params.page = page;
           params.page_size = page_size;
+          if (params.filters) {
+            try {
+            //  filters = {...JSON.parse(params.filters),...this.state.filters};
+            } catch (err) {}
+          }else{
+            filters=this.state.filters;
+          }
+          // params.filters=encodeURIComponent(filters);
           const param = webapi.utils.http_build_query(params);
           const url = urlParams.pathname + "?" + param;
           this.props.history.replace(url);
           this[method]();
+          // console.log(webapi.utils.query(),this.state.filters)
         }
       }
     );
@@ -335,7 +348,8 @@ merger = (...opts) => {
    * @param sorter
    * @return mixed
    */
-  __handle_table_change = (pagination, filters, sorter) => {
+  __handle_table_change = (pagination, filters, sorter) => { 
+    // console.log('__handle_table_change',pagination, filters, sorter);
     const page = { ...this.state.pagination, ...pagination };
     const order_field = sorter.field ? sorter.field : this.state.order_field;
     const order_value = sorter.field
