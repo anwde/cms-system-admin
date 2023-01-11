@@ -3,15 +3,15 @@ import webapi from "../../utils/webapi";
 import store from "../../redux/store";
 import type { TablePaginationConfig } from "antd";
 interface NavigationBarProps {
-  server: { loading: boolean, };
+  server: { loading: boolean };
   match: {
     params: Object,
   };
-  history:{
-    replace:(url:string)=>{};
-  }
+  history: {
+    replace: (url: string) => {},
+  };
 }
- 
+
 export default class Basic_Component extends React.Component<NavigationBarProps> {
   interval = 0;
   /**
@@ -118,7 +118,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
 
   __tail_layout = () => {
     return {
-      onValuesChange:this.__handle_values_change,		
+      onValuesChange: this.__handle_values_change,
       wrapperCol: { offset: 4, span: 14 },
     };
   };
@@ -175,31 +175,31 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
   /*----------------------1 other end----------------------*/
 
   /*----------------------2 init start  ----------------------*/
-merger = (...opts) => {
+  merger = (...opts) => {
     let res = {};
-    
+
     let combine = (opt) => {
-        for(let prop in opt) {
-            if(opt.hasOwnProperty(prop)) {
-                res[prop] = opt[prop];
-            }
+      for (let prop in opt) {
+        if (opt.hasOwnProperty(prop)) {
+          res[prop] = opt[prop];
         }
-    }
+      }
+    };
 
     //扩张运算符将两个对象合并到一个数组里，因此opts可以调用length方法
     for (let i = 0; i < opts.length; i++) {
-        combine(opts[i]);
+      combine(opts[i]);
     }
     return res;
-} 
+  };
   /**
    * init_state 初始化状态 2=init
    * @return obj
    */
   __init_state() {
     const query = webapi.utils.query();
-    const params = this.__get_params(); 
-    return  {
+    const params = this.__get_params();
+    return {
       ...this.__init_state_before(),
       q: query.q || "",
       method: params.method || "index",
@@ -207,11 +207,11 @@ merger = (...opts) => {
       order_field: "create_time",
       order_value: "desc",
       filters: [],
-      data: {id:0},
+      data: { id: 0 },
       lists: [],
       pagination: this.__init_page_data(query),
-      ...this.__init_state_after()
-    }; 
+      ...this.__init_state_after(),
+    };
   }
   /**
    * init state  handle 初始化 state 和 handle
@@ -234,9 +234,9 @@ merger = (...opts) => {
    * @return obj
    */
   __init_state_after(): {} {
-    return {columns_children:[]};
+    return { columns_children: [] };
   }
-  __init_page_data(data = {}):TablePaginationConfig {
+  __init_page_data(data = {}): TablePaginationConfig {
     // console.log('1111=>',TablePaginationConfig)
     return {
       showSizeChanger: false,
@@ -268,9 +268,9 @@ merger = (...opts) => {
   /*----------------------2 init end  ----------------------*/
 
   /*----------------------3 handle start----------------------*/
-  __handle_values_change=(k:any,v:any)=>{
-    console.log('val=>',k,v)
-  }
+  __handle_values_change = (k: any, v: any) => {
+    console.log("val=>", k, v);
+  };
   /**
    * handle_init 业务初始化 3=handle
    * @return obj
@@ -284,12 +284,12 @@ merger = (...opts) => {
    *  业务初始化前 子类可重写
    * @return obj
    */
-  __handle_init_before () {};
+  __handle_init_before() {}
   /**
    *  业务初始化后 子类可重写
    * @return obj
    */
-  __handle_init_after(){};
+  __handle_init_after() {}
 
   /**
    * 改变 分页
@@ -310,17 +310,17 @@ merger = (...opts) => {
         if (!(method in this)) {
           console.warn("__handle_page_change 方法:" + method + "不存在");
         } else {
-          let filters=[];
+          let filters = [];
           const urlParams = new URL(window.location.href);
           const params = webapi.utils.query();
           params.page = page;
           params.page_size = page_size;
           if (params.filters) {
             try {
-            //  filters = {...JSON.parse(params.filters),...this.state.filters};
+              //  filters = {...JSON.parse(params.filters),...this.state.filters};
             } catch (err) {}
-          }else{
-            filters=this.state.filters;
+          } else {
+            filters = this.state.filters;
           }
           // params.filters=encodeURIComponent(filters);
           const param = webapi.utils.http_build_query(params);
@@ -348,7 +348,7 @@ merger = (...opts) => {
    * @param sorter
    * @return mixed
    */
-  __handle_table_change = (pagination, filters, sorter) => { 
+  __handle_table_change = (pagination, filters, sorter) => {
     // console.log('__handle_table_change',pagination, filters, sorter);
     const page = { ...this.state.pagination, ...pagination };
     const order_field = sorter.field ? sorter.field : this.state.order_field;
@@ -367,6 +367,32 @@ merger = (...opts) => {
         this.__handle_page_change(page.current, page.pageSize);
       }
     );
+  };
+  /*
+   * handle_table_change
+   * @param params
+   * @param sorts
+   * @param filter
+   * @return mixed
+   */
+  __handle_tablepro_request = (params = {}, sorts, filter):[] => {
+    let filters = webapi.utils.deepclone(params);
+    const s = Object.keys(sorts);
+    let field = "";
+    let order = "";
+    if (s.length > 0) {
+      field = s[0];
+      order = sorts[field];
+    }
+    delete filters.current;
+    delete filters.pageSize;
+    this.__handle_table_change(
+      params,
+      { ...filter, ...filters },
+      { field, order }
+    );
+    console.log(params,sorts,filter)
+    return [];
   };
   __handle_scroll_top = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -437,7 +463,7 @@ merger = (...opts) => {
    * @return obj
    */
   __render_add_edit(u_action) {
-    return <></>
+    return <></>;
   }
   /*----------------------4 render end----------------------*/
 }

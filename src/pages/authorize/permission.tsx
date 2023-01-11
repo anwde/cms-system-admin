@@ -18,8 +18,7 @@ import {
   Space,
 } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { FormInstance } from "antd/lib/form";
-import { Server } from "tls";
+import { FormInstance } from "antd/lib/form"; 
 const BREADCRUMB = {
   title: "权限管理",
   lists: [
@@ -154,9 +153,11 @@ class Permission extends Basic_Authorize<{}, State> {
       { title: "添加群组", url: "/authorize/permission/group_add" },
       { title: "权限管理", url: "/authorize/permission" },
     ];
-    let title = BREADCRUMB.title + "-群组";
+    let lists=BREADCRUMB.lists;
+    lists.push({ title: "群组", url: "/authorize/permission/group" });
+    let title = "群组";
     this.__init_lists("authorize/permission/group", d);
-    this.__breadcrumb({ buttons, title });
+    this.__breadcrumb({ buttons, title,lists });
   }
 
   /*----------------------2 init end  ----------------------*/
@@ -473,25 +474,14 @@ class Permission extends Basic_Authorize<{}, State> {
         pagination={this.state.pagination}
         dataSource={this.state.lists}
         loading={this.props.server.loading}
-        // onChange={this.__handle_table_change}
-        request={async (params = {}, sorts, filter) => {
-          
-          let filters = webapi.utils.deepclone(params);
-          const s = Object.keys(sorts);
-          let field = "";
-          let order = "";
-          if (s.length > 0) {
-            field = s[0];
-            order = sorts[field];
-          }
-          delete(filters.current);
-          delete(filters.pageSize); 
-          this.__handle_table_change(params, {...filter,...filters}, { field, order });
-          return [];
-        }}
+        // onChange={this.__handle_table_change} 
         search={{
           labelWidth: "auto",
         }}
+        request={async (params = {}, sorts, filter) => {
+          return this.__handle_tablepro_request(params,sorts,filter); 
+        }}
+       
       />
     );
   }

@@ -2,7 +2,7 @@ import React from "react";
 import Basic_Component from "../../components/base/component";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import webapi from "../../utils/webapi"; 
+import webapi from "../../utils/webapi";
 import moment from "moment";
 import ProTable from "@ant-design/pro-table";
 import type { ProColumns } from "@ant-design/pro-table";
@@ -24,14 +24,14 @@ import {
 } from "@ant-design/icons";
 import { FormInstance } from "antd/lib/form";
 const BREADCRUMB = {
-  title: "菜单管理",
+  title: "菜单",
   lists: [
     { title: "主页", url: "/" },
-    { title: "菜单管理", url: "/authorize/menus" },
+    { title: "菜单", url: "/authorize/menus" },
   ],
   buttons: [
-    { title: "添加菜单", url: "/authorize/menus/add" },
-    { title: "群组管理", url: "/authorize/menus/group" },
+    { title: "添加", url: "/authorize/menus/add" },
+    { title: "群组", url: "/authorize/menus/group" },
   ],
 };
 type Module_data<T = any> = {
@@ -50,7 +50,12 @@ class Menus extends Basic_Component {
     super(props);
   }
   /*----------------------0 parent start----------------------*/
-
+  /**
+   * 面包屑导航
+   */
+   __breadcrumb(data = {}): void {
+    super.__breadcrumb({ ...BREADCRUMB, ...data });
+  }
   /*----------------------0 parent end----------------------*/
 
   /*----------------------1 other start----------------------*/
@@ -142,12 +147,13 @@ class Menus extends Basic_Component {
    * group 列表数据
    */
   async __init_group(d = {}) {
-    var buttons = [
-      { title: "添加群组", url: "/menus/group_add" },
-      { title: "菜单管理", url: "/menus" },
-    ];
-    var title = `${BREADCRUMB.title}群组`;
-    this.init_lists("authorize/menus/group", d, { buttons, title });
+    let buttons = [
+      { title: "添加", url: "/authorize/menus/group_add" },
+      { title: "菜单", url: "/authorize/menus" },
+    ]; 
+    let lists=[...BREADCRUMB.lists];
+    lists.push({ title: "群组", url: "/authorize/menus/group" });
+    this.init_lists("authorize/menus/group", d, { lists,buttons, title :'群组'});
   }
   __init_group_edit() {
     this.__init_group_add_edit("edit");
@@ -272,6 +278,7 @@ class Menus extends Basic_Component {
         title: "更新时间",
         sorter: true,
         dataIndex: "update_time",
+        align: "center",
         render: (_, row) => {
           if (row.update_time && row.update_time > 0) {
             return moment(row.update_time * 1000).format("YYYY-MM-DD HH:mm:ss");
@@ -279,12 +286,13 @@ class Menus extends Basic_Component {
             return <></>;
           }
         },
-        align: "center",
+        search: false,
       },
       {
         title: "创建时间",
         sorter: true,
         dataIndex: "create_time",
+        align: "center",
         render: (_, row) => {
           if (row.create_time && row.create_time > 0) {
             return moment(row.create_time * 1000).format("YYYY-MM-DD HH:mm:ss");
@@ -292,11 +300,21 @@ class Menus extends Basic_Component {
             return <></>;
           }
         },
-        align: "center",
+
+        valueType: "dateRange",
+        search: {
+          transform: (value) => {
+            return {
+              start_time: value[0],
+              end_time: value[1],
+            };
+          },
+        },
       },
       {
         title: "操作",
         align: "center",
+        search: false,
         render: (_, row) => {
           return (
             <Space>
@@ -320,13 +338,12 @@ class Menus extends Basic_Component {
     ];
     return (
       <ProTable
-        headerTitle="菜单管理"
+        
         rowKey={"id"}
         columns={columns}
         pagination={this.state.pagination}
         dataSource={this.state.lists}
         loading={this.props.server.loading}
-        onChange={this.__handle_table_change}
         toolBarRender={() => [
           <Link to={"/authorize/menus/add"}>
             <Button type="primary" shape="round">
@@ -334,11 +351,14 @@ class Menus extends Basic_Component {
             </Button>
           </Link>,
         ]}
-        search={{
-          labelWidth: 120,
-        }}
         rowSelection={{
           onChange: (_, selectedRows) => {},
+        }}
+        search={{
+          labelWidth: "auto",
+        }}
+        request={async (params = {}, sorts, filter) => {
+          return this.__handle_tablepro_request(params, sorts, filter);
         }}
       />
     );
@@ -417,38 +437,56 @@ class Menus extends Basic_Component {
         title: "名称",
         sorter: true,
         fixed: "left",
-        dataIndex: "name",
-
+        dataIndex: "name", 
         align: "center",
       },
       {
         title: "状态",
         sorter: true,
         fixed: "left",
-        dataIndex: "visibility",
-
+        dataIndex: "visibility", 
         align: "center",
         render: function (field, data) {
           return field === "1" ? "显示" : "隐藏";
         },
+        valueType: 'select',
+        valueEnum: {
+          0: { text: '全部', status: '0' },
+          1: {
+            text: '显示',
+            status: '1',
+          },
+          2: {
+            text: '隐藏',
+            status: '2',
+          },
+        }
       },
       {
         title: "时间",
         sorter: true,
         dataIndex: "create_time",
+        align: "center",
         render: function (_, row) {
           if (row.create_time && row.create_time > 0) {
             return moment(row.create_time * 1000).format("YYYY-MM-DD HH:mm:ss");
           } else {
             return <></>;
           }
+        }, 
+        valueType: "dateRange",
+        search: {
+          transform: (value) => {
+            return {
+              start_time: value[0],
+              end_time: value[1],
+            };
+          },
         },
-
-        align: "center",
       },
       {
         title: "操作",
-
+        search: false,
         align: "center",
         render: (_, row) => {
           return (
@@ -478,7 +516,12 @@ class Menus extends Basic_Component {
         pagination={this.state.pagination}
         dataSource={this.state.lists}
         loading={this.props.server.loading}
-        onChange={this.__handle_table_change}
+        search={{
+          labelWidth: "auto",
+        }}
+        request={async (params = {}, sorts, filter) => {
+          return this.__handle_tablepro_request(params, sorts, filter);
+        }}
       />
     );
   }
@@ -537,4 +580,4 @@ class Menus extends Basic_Component {
   }
   /*----------------------4 render end  ----------------------*/
 }
-export default connect((store) => ({ ...store }))((Menus));
+export default connect((store) => ({ ...store }))(Menus);

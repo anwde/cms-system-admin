@@ -79,15 +79,15 @@ declare module "*.less" {
 declare namespace Server {
   type Breadcrumb = {
     title?: string;
-    lists?: [];
-    buttons?: [];
+    lists?: [{'onClick':'','url':'','title':''}];
+    buttons?: [{'onClick':'','url':'','title':''}];
   };
 
   type Routes = {
     path: string;
     component?: React.LazyExoticComponent;
     //Component: React.LazyExoticComponent<React.FunctionComponent>
-    children?: [Routes];
+    children?: Routes[];
   };
   type Ucdata = {
     user_id?: number;
@@ -105,6 +105,7 @@ declare namespace Server {
     loading?: Boolean;
     code?: number;
     version?: string;
+    breadcrumb?:Breadcrumb
   };
   type Props={
     server?:Server;

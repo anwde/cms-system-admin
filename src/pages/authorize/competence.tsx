@@ -2,9 +2,9 @@ import React from "react";
 import Basic_Authorize from "./basic_authorize";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import webapi from "../../utils/webapi"; 
+import webapi from "../../utils/webapi";
 import { Form, Input, Tree, Space, Button, Drawer, Avatar } from "antd";
-import { 
+import {
   UserSwitchOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -26,19 +26,19 @@ type D_data = {
   [key: number]: { id: number; name: string };
 };
 type Module_data<T = any> = {
-  [key: number|string]: T;
+  [key: number | string]: T;
 };
 
 type State = Server.State & {
   drawer_visible: boolean;
-  customer:D_data,
-  applications:D_data,
-  server_state:D_data,
-  menus:[],
-  columns:[],
-  permission:[],
+  customer: D_data;
+  applications: D_data;
+  server_state: D_data;
+  menus: [];
+  columns: [];
+  permission: [];
 };
-class Competence extends Basic_Authorize<{},State> {
+class Competence extends Basic_Authorize<{}, State> {
   formRef: React.RefObject<FormInstance> = React.createRef<FormInstance>();
   columns: Module_data<[Server.Columns]> = {};
   permission: Module_data<[Server.Permission]> = {};
@@ -55,6 +55,12 @@ class Competence extends Basic_Authorize<{},State> {
     super.__handle_init_before();
     this.get_server_state();
   };
+  /**
+   * 面包屑导航
+   */
+  __breadcrumb(data = {}): void {
+    super.__breadcrumb({ ...BREADCRUMB, ...data });
+  }
   /*----------------------1 other start----------------------*/
   async get_columns(data: { filters: {} }, reset = false) {
     let hash = webapi.utils.md5(
@@ -72,7 +78,7 @@ class Competence extends Basic_Authorize<{},State> {
         columns = res.lists;
       }
     }
-      this.columns[hash] = columns as [Server.Columns];
+    this.columns[hash] = columns as [Server.Columns];
     return this.columns[hash];
   }
   async get_permission(data: { filters: {} }, reset = false) {
@@ -91,7 +97,7 @@ class Competence extends Basic_Authorize<{},State> {
         permission = res.lists;
       }
     }
-      this.permission[hash] = permission as [Server.Permission];
+    this.permission[hash] = permission as [Server.Permission];
     return this.permission[hash];
   }
 
@@ -161,7 +167,10 @@ class Competence extends Basic_Authorize<{},State> {
     ];
     this.setState({ order_field: "UC.create_time" }, () => {
       d.competence_id = this.state.id;
-      this.init_lists("authorize/competence/user", d as Server.Query, { title, buttons });
+      this.init_lists("authorize/competence/user", d as Server.Query, {
+        title,
+        buttons,
+      });
     });
   }
   /**
@@ -179,7 +188,8 @@ class Competence extends Basic_Authorize<{},State> {
     ];
     this.setState(
       {
-        customer,applications,
+        customer,
+        applications,
         server_state: state,
       },
       () => {
@@ -302,13 +312,13 @@ class Competence extends Basic_Authorize<{},State> {
     this.setState({ drawer_visible: false });
   }
 
-  handle_menus_check = (selectedKeys:any=[]) => {
+  handle_menus_check = (selectedKeys: any = []) => {
     this.setState({ data: { ...this.state.data, menus: selectedKeys } });
   };
-  handle_columns_check = (selectedKeys:any = []) => {
+  handle_columns_check = (selectedKeys: any = []) => {
     this.setState({ data: { ...this.state.data, columns: selectedKeys } });
   };
-  handle_permission_check = (selectedKeys:any = []) => {
+  handle_permission_check = (selectedKeys: any = []) => {
     this.setState({
       data: { ...this.state.data, permission: selectedKeys },
     });
@@ -426,7 +436,7 @@ class Competence extends Basic_Authorize<{},State> {
           loading={this.props.server.loading}
           onChange={this.__handle_table_change}
         />
-        
+
         <Drawer
           title="添加用户"
           width={500}
@@ -469,13 +479,13 @@ class Competence extends Basic_Authorize<{},State> {
    * 渲染 首页
    **/
   __render_index() {
-    const state = this.state as unknown as  State;
+    const state = this.state as unknown as State;
     const server = this.props.server;
     const customer = state.customer;
     const applications = state.applications;
     const server_state = state.server_state;
 
-    const columns: ProColumns<Server.Competence>[]  = [
+    const columns: ProColumns<Server.Competence>[] = [
       {
         title: "ID",
         sorter: true,
@@ -511,6 +521,7 @@ class Competence extends Basic_Authorize<{},State> {
         fixed: "left",
         dataIndex: "total",
         align: "center",
+        search: false,
         render: (field, data) => {
           return (
             <>
@@ -525,7 +536,8 @@ class Competence extends Basic_Authorize<{},State> {
         fixed: "left",
         dataIndex: "state",
         align: "center",
-        render: (_,row) => {
+        search: false,
+        render: (_, row) => {
           let i = row.state as number;
           return server_state[i] && server_state[i]["name"];
         },
@@ -534,19 +546,15 @@ class Competence extends Basic_Authorize<{},State> {
       {
         title: "商户",
         sorter: true,
-
         dataIndex: "customer_id",
         align: "center",
+        search: false,
         render: (_, row) => {
           let i = row.customer_id as number;
-          return ( 
+          return (
             <>
-              <Link
-                to={`?customerid=${i}`}
-                onClick={() => this.__init_index()}
-              >
-                {customer[i] &&
-                  customer[i]["name"]}
+              <Link to={`?customerid=${i}`} onClick={() => this.__init_index()}>
+                {customer[i] && customer[i]["name"]}
               </Link>
             </>
           );
@@ -557,6 +565,7 @@ class Competence extends Basic_Authorize<{},State> {
         sorter: true,
         dataIndex: "client_id",
         align: "center",
+        search: false,
         render: (_, row) => {
           let i = row.client_id as number;
           return (
@@ -565,8 +574,7 @@ class Competence extends Basic_Authorize<{},State> {
                 to={`?customerappid=${i}`}
                 onClick={() => this.__init_index()}
               >
-                {applications[i] &&
-                  applications[i]["name"]}
+                {applications[i] && applications[i]["name"]}
               </Link>
             </>
           );
@@ -580,20 +588,28 @@ class Competence extends Basic_Authorize<{},State> {
         width: "190px",
         align: "center",
         render: (_, row) => {
-          if (row.create_time && row.create_time > 0) {
-            return moment(row.create_time * 1000).format("YYYY-MM-DD HH:mm:ss");
-          } else {
-            return <></>;
-          }
-          
+          return row.create_time && row.create_time > 0 ? (
+            moment(row.create_time * 1000).format("YYYY-MM-DD HH:mm:ss")
+          ) : (
+            <></>
+          );
         },
-       
+        valueType: "dateRange",
+        search: {
+          transform: (value) => {
+            return {
+              start_time: value[0],
+              end_time: value[1],
+            };
+          },
+        },
       },
       {
         title: "操作",
         align: "center",
         width: "200px",
         fixed: "right",
+        search: false,
         render: (_, row) => {
           return (
             <Space>
@@ -611,26 +627,31 @@ class Competence extends Basic_Authorize<{},State> {
                 <Button type="primary" shape="circle" icon={<EditOutlined />} />
               </Link>
               <Link to={`/authorize/competence/user/${row.id}`}>
-                <Button type="primary" shape="circle" icon={<UserSwitchOutlined />} />
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<UserSwitchOutlined />}
+                />
               </Link>
-
-            </Space> 
-              
+            </Space>
           );
         },
       },
     ];
     return (
       <ProTable
-      rowKey="id"
-      columns={columns}
-      pagination={this.state.pagination}
-      dataSource={this.state.lists}
-      loading={this.props.server.loading}
-      onChange={this.__handle_table_change} 
-    />
-
-       
+        rowKey="id"
+        columns={columns}
+        pagination={this.state.pagination}
+        dataSource={this.state.lists}
+        loading={this.props.server.loading}
+        search={{
+          labelWidth: "auto",
+        }}
+        request={async (params = {}, sorts, filter) => {
+          return this.__handle_tablepro_request(params, sorts, filter);
+        }}
+      />
     );
   }
 
@@ -638,10 +659,10 @@ class Competence extends Basic_Authorize<{},State> {
    * 添加、编辑
    * @return obj
    */
-  __render_add_edit(u_action:string) {
-    const state =this.state as unknown as State;
-    const data=state.data as Server.Competence
-    console.log('data=>',state)
+  __render_add_edit(u_action: string) {
+    const state = this.state as unknown as State;
+    const data = state.data as Server.Competence;
+    console.log("data=>", state);
     return (
       <Form ref={this.formRef} onFinish={this.handle_submit}>
         <Form.Item name="name" label="名称">
@@ -693,4 +714,4 @@ class Competence extends Basic_Authorize<{},State> {
 
   /*----------------------4 render end  ----------------------*/
 }
-export default connect((store) => ({ ...store }))((Competence));
+export default connect((store) => ({ ...store }))(Competence);

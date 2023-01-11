@@ -5,7 +5,9 @@ import type { ProSettings } from "@ant-design/pro-layout";
 import ProLayout, {
   PageContainer,
   SettingDrawer,
+  ProBreadcrumb,
 } from "@ant-design/pro-layout";
+import { Button } from "antd";
 import defaultProps from "./_defaultProps";
 import routers from "../routes/router";
 import webapi from "../utils/webapi";
@@ -20,7 +22,6 @@ const loopMenuItem = (
   columns: [],
   is_children: boolean = false
 ): MenuDataItem[] => {
-  // console.log("props=>", LikeOutlined);
   return columns.map(({ icon, children, name, url }) => ({
     name,
     icon: icon ? <Icon component={Icons[icon]} /> : "",
@@ -40,18 +41,35 @@ const Irouters = (Server_routes: Server.Routes[]) => {
       if (prop.children) {
         rs(prop.children, prop);
       }
-      r.push(<Route path={path} key={key} component={component}></Route>);
+      r.push(<Route path={path} key={path} component={component}></Route>);
     });
   };
   rs(Server_routes);
   return r;
+};
+console.log("props=>", Irouters(routers));
+const container_extra = (buttons: [{ onClick: ""; url: ""; title: "" }]) => {
+  return buttons.map((val, key) => {
+    return (
+      <Link
+        onClick={val.onClick ? val.onClick : () => {}}
+        key={key}
+        to={val.url ? val.url : "#!"}
+      >
+        <Button>{val.title}</Button>
+      </Link>
+    );
+  });
 };
 const Layout = () => {
   const [settings, setSetting] = useState<Partial<ProSettings> | undefined>({
     fixSiderbar: true,
   });
   const [pathname, setPathname] = useState("/welcome");
-  const { columns } = useSelector((state: Server.Props) => state.server);
+  const { columns, breadcrumb } = useSelector(
+    (state: Server.Props) => state.server
+  );
+  console.log("breadcrumb=>", breadcrumb);
   return (
     <>
       <ProLayout
@@ -75,16 +93,41 @@ const Layout = () => {
           );
         }}
         rightContentRender={() => <RightContent />}
+        breadcrumbRender={(routers = []) => {
+          return breadcrumb.lists.map((val, key) => {
+            return {
+              path: val.url,
+              breadcrumbName: val.title,
+            };
+          });
+        }}
+        breadcrumbProps={{
+          itemRender: (route, params, routes, paths) => {
+            return  <Link to={'/'+paths.join("/")}>{route.breadcrumbName}</Link>;
+            // console.log(route, params, routes, paths)
+            // const last = routes.indexOf(route) === routes.length - 1;
+            // return last ? (
+            //   <span>{route.breadcrumbName}</span>
+            // ) : (
+            //   <Link to={paths.join("/")}>{route.breadcrumbName}</Link>
+            // );
+          },
+        }}
         {...settings}
       >
         <div
           style={{
-            height: "120vh",
+            minHeight: "120vh",
           }}
         >
-          <Suspense fallback={<Loading />}>
-            <Switch>{Irouters(routers)}</Switch>
-          </Suspense>
+          <PageContainer
+            title={breadcrumb.title}
+            extra={container_extra(breadcrumb.buttons)}
+          >
+            <Suspense fallback={<Loading />}>
+              <Switch>{Irouters(routers)}</Switch>
+            </Suspense>
+          </PageContainer>
         </div>
       </ProLayout>
       {/* <SettingDrawer
