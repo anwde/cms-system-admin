@@ -681,55 +681,53 @@ class Permission extends Basic_Authorize<{}, State> {
   __render_children() {
     const state = this.state as unknown as State;
     const children = state.children || [];
-    return (
-      <>
-        <Tree
-          className="draggable-tree"
-          showLine={{ showLeafIcon: false }}
-          draggable
-          blockNode
-          onDragEnd={this.handle_drag_end}
-          onDrop={this.handle_drop}
-          // onSelect={this.handle_select}
-          treeData={children}
-        />
-        <Drawer
-          title={(state.u_action === "add" ? "添加" : "编辑") + "权限"}
-          width={500}
-          forceRender={true}
-          onClose={this.handle_drawer_close}
-          visible={state.drawer_visible}
-          bodyStyle={{ paddingBottom: 80 }}
-          footer={
-            <div
-              style={{
-                textAlign: "right",
-              }}
+    return (<>
+      <Tree
+        className="draggable-tree"
+        showLine={{ showLeafIcon: false }}
+        draggable
+        blockNode
+        onDragEnd={this.handle_drag_end}
+        onDrop={this.handle_drop}
+        // onSelect={this.handle_select}
+        treeData={children}
+      />
+      <Drawer
+        title={(state.u_action === "add" ? "添加" : "编辑") + "权限"}
+        width={500}
+        forceRender={true}
+        onClose={this.handle_drawer_close}
+        open={state.drawer_visible}
+        bodyStyle={{ paddingBottom: 80 }}
+        footer={
+          <div
+            rootStyle={{
+              textAlign: "right",
+            }}
+          >
+            <Button
+              shape="round"
+              rootStyle={{ marginRight: 8 }}
+              onClick={this.handle_drawer_close}
             >
-              <Button
-                shape="round"
-                style={{ marginRight: 8 }}
-                onClick={this.handle_drawer_close}
-              >
-                取消
-              </Button>
-              <Button
-                shape="round"
-                loading={this.props.server.loading}
-                type="primary"
-                onClick={this.handle_drawer_submit}
-              >
-                提交
-              </Button>
-            </div>
-          }
-        >
-          <Form ref={this.formRef} onFinish={this.handle_submit}>
-            {this.__render_add_edit_children(state.u_action)}
-          </Form>
-        </Drawer>
-      </>
-    );
+              取消
+            </Button>
+            <Button
+              shape="round"
+              loading={this.props.server.loading}
+              type="primary"
+              onClick={this.handle_drawer_submit}
+            >
+              提交
+            </Button>
+          </div>
+        }
+      >
+        <Form ref={this.formRef} onFinish={this.handle_submit}>
+          {this.__render_add_edit_children(state.u_action)}
+        </Form>
+      </Drawer>
+    </>);
   }
   /*----------------------4 render end  ----------------------*/
 }

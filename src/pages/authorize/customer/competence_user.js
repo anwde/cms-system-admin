@@ -216,22 +216,22 @@ class Competence_user extends Basic_Customer {
    */
   __render_add_edit() {
     return (
-      <Drawer
+      (<Drawer
         title="添加用户"
         width={500}
         forceRender={true}
         onClose={this.handle_drawer_close}
-        visible={this.state.drawer_visible}
+        open={this.state.drawer_visible}
         bodyStyle={{ paddingBottom: 80 }}
         footer={
           <div
-            style={{
+            rootStyle={{
               textAlign: "right",
             }}
           >
             <Button
               onClick={this.handle_drawer_close}
-              style={{ marginRight: 8 }}
+              rootStyle={{ marginRight: 8 }}
             >
               取消
             </Button>
@@ -250,7 +250,7 @@ class Competence_user extends Basic_Customer {
             <Input placeholder="请输入用户id或手机号" />
           </Form.Item>
         </Form>
-      </Drawer>
+      </Drawer>)
     );
   }
   /*----------------------4 render end  ----------------------*/

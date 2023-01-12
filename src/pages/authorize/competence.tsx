@@ -425,55 +425,52 @@ class Competence extends Basic_Authorize<{}, State> {
       },
     ];
 
-    return (
-      <>
-        <ProTable
-          headerTitle="授权用户"
-          rowKey={"id"}
-          columns={columns}
-          pagination={this.state.pagination}
-          dataSource={this.state.lists}
-          loading={this.props.server.loading}
-          onChange={this.__handle_table_change}
-        />
-
-        <Drawer
-          title="添加用户"
-          width={500}
-          forceRender={true}
-          onClose={this.handle_drawer_close}
-          visible={state.drawer_visible}
-          bodyStyle={{ paddingBottom: 80 }}
-          footer={
-            <div
-              style={{
-                textAlign: "right",
-              }}
+    return (<>
+      <ProTable
+        headerTitle="授权用户"
+        rowKey={"id"}
+        columns={columns}
+        pagination={this.state.pagination}
+        dataSource={this.state.lists}
+        loading={this.props.server.loading}
+        onChange={this.__handle_table_change}
+      />
+      <Drawer
+        title="添加用户"
+        width={500}
+        forceRender={true}
+        onClose={this.handle_drawer_close}
+        open={state.drawer_visible}
+        bodyStyle={{ paddingBottom: 80 }}
+        footer={
+          <div
+            rootStyle={{
+              textAlign: "right",
+            }}
+          >
+            <Button
+              onClick={this.handle_drawer_close}
+              rootStyle={{ marginRight: 8 }}
             >
-              <Button
-                onClick={this.handle_drawer_close}
-                style={{ marginRight: 8 }}
-              >
-                取消
-              </Button>
-              <Button
-                onClick={this.handle_drawer_submit}
-                loading={this.props.server.loading}
-                type="primary"
-              >
-                提交
-              </Button>
-            </div>
-          }
-        >
-          <Form layout="horizontal" ref={this.formRef}>
-            <Form.Item name="user_id" label="用户">
-              <Input placeholder="请输入用户id或手机号" />
-            </Form.Item>
-          </Form>
-        </Drawer>
-      </>
-    );
+              取消
+            </Button>
+            <Button
+              onClick={this.handle_drawer_submit}
+              loading={this.props.server.loading}
+              type="primary"
+            >
+              提交
+            </Button>
+          </div>
+        }
+      >
+        <Form layout="horizontal" ref={this.formRef}>
+          <Form.Item name="user_id" label="用户">
+            <Input placeholder="请输入用户id或手机号" />
+          </Form.Item>
+        </Form>
+      </Drawer>
+    </>);
   }
   /**
    * 渲染 首页

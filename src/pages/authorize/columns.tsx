@@ -558,207 +558,205 @@ class Columns extends Basic_Authorize<{}, State> {
     // Object.entries(templates).map(([key, val]) => {
     //   console.log('templates',val)
     // });
-    return (
-      <>
-        <Modal
-          title="请选择图标"
-          visible={state.icon_visible}
-          onOk={this.handle_icon_confirm}
-          onCancel={this.handle_icon_clos}
-        >
-          <div className={styles.content_article}>
-            <ul className={styles.ul}>
-              {Object.entries(Icons).map(([key, val]) => {
-                if (typeof val == "function") {
-                  return;
-                }
+    return (<>
+      <Modal
+        title="请选择图标"
+        open={state.icon_visible}
+        onOk={this.handle_icon_confirm}
+        onCancel={this.handle_icon_clos}
+      >
+        <div className={styles.content_article}>
+          <ul className={styles.ul}>
+            {Object.entries(Icons).map(([key, val]) => {
+              if (typeof val == "function") {
+                return;
+              }
+              return (
+                <li
+                  key={key}
+                  className={classnames(
+                    styles.li,
+                    state.icon === key ? styles.hover : ""
+                  )}
+                  onClick={() => {
+                    this.handle_icon_select(key);
+                  }}
+                >
+                  <Icon component={Icons[key]} className={styles.anticon} />
+                  <span className={styles.anticon_class}>
+                    <span className="ant-badge"> {key}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </Modal>
+      <Tabs defaultActiveKey="1">
+        <Tabs.TabPane tab="基本选项" key="1">
+          <Form.Item name="name" label="名称">
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="parent_id_all" label="上级">
+            <Cascader
+              options={columns_children}
+              fieldNames={{ label: "title", value: "key" }}
+              changeOnSelect
+              onChange={this.handle_parent_id}
+            />
+          </Form.Item>
+
+          <Form.Item label="图片">
+            {data.image ? (
+              <p>
+                <img alt="" src={data.image} style={{ width: "100px" }} />
+              </p>
+            ) : (
+              ""
+            )}
+
+            <Upload {...this.__upload_single_props()}>
+              <Button icon={<UploadOutlined />}>上传图片</Button>
+            </Upload>
+          </Form.Item>
+          <Form.Item name="idx" label="排序">
+            <Input />
+          </Form.Item>
+          <Form.Item name="icon" label="图标">
+            <Button
+              type="primary"
+              shape="circle"
+              size="large"
+              icon={
+                <Icon component={Icons[data.icon]} style={{ fontSize: 30 }} />
+              }
+              onClick={() => {
+                this.handle_icon_show();
+              }}
+            />
+          </Form.Item>
+          <Form.Item name="type" label="类型">
+            <Select>
+              {Object.entries(types).map(([key, val]) => {
                 return (
-                  <li
-                    key={key}
-                    className={classnames(
-                      styles.li,
-                      state.icon === key ? styles.hover : ""
-                    )}
-                    onClick={() => {
-                      this.handle_icon_select(key);
-                    }}
-                  >
-                    <Icon component={Icons[key]} className={styles.anticon} />
-                    <span className={styles.anticon_class}>
-                      <span className="ant-badge"> {key}</span>
-                    </span>
-                  </li>
+                  <Select.Option key={key} value={val.id}>
+                    {val.name}
+                  </Select.Option>
                 );
               })}
-            </ul>
-          </div>
-        </Modal>
-        <Tabs defaultActiveKey="1">
-          <Tabs.TabPane tab="基本选项" key="1">
-            <Form.Item name="name" label="名称">
-              <Input />
-            </Form.Item>
+            </Select>
+          </Form.Item>
+          <Form.Item name="model_id" label="模型">
+            <Select>
+              {Object.entries(model).map(([key, val]) => {
+                return (
+                  <Select.Option key={key} value={val.id}>
+                    {val.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+          <Form.Item name="intro" label="介绍">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="生成设置" key="2">
+          <Form.Item label="生成静态" name="sethtml">
+            <Radio.Group>
+              <Radio value={1}>生成静态</Radio>
+              <Radio value={2}>跟随系统</Radio>
+            </Radio.Group>
+          </Form.Item>
 
-            <Form.Item name="parent_id_all" label="上级">
-              <Cascader
-                options={columns_children}
-                fieldNames={{ label: "title", value: "key" }}
-                changeOnSelect
-                onChange={this.handle_parent_id}
-              />
-            </Form.Item>
+          <Form.Item name="is_login" label="是否登录">
+            <Radio.Group>
+              <Radio value={1}>登录可见</Radio>
+              <Radio value={2}>游客可见</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item name="is_column" label="后台可见">
+            <Radio.Group>
+              <Radio value={1}>显示</Radio>
+              <Radio value={2}>隐藏</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item name="is_menu" label="前台可见">
+            <Radio.Group>
+              <Radio value={1}>显示</Radio>
+              <Radio value={2}>隐藏</Radio>
+            </Radio.Group>
+          </Form.Item>
 
-            <Form.Item label="图片">
-              {data.image ? (
-                <p>
-                  <img alt="" src={data.image} style={{ width: "100px" }} />
-                </p>
-              ) : (
-                ""
-              )}
-
-              <Upload {...this.__upload_single_props()}>
-                <Button icon={<UploadOutlined />}>上传图片</Button>
-              </Upload>
-            </Form.Item>
-            <Form.Item name="idx" label="排序">
-              <Input />
-            </Form.Item>
-            <Form.Item name="icon" label="图标">
-              <Button
-                type="primary"
-                shape="circle"
-                size="large"
-                icon={
-                  <Icon component={Icons[data.icon]} style={{ fontSize: 30 }} />
-                }
-                onClick={() => {
-                  this.handle_icon_show();
-                }}
-              />
-            </Form.Item>
-            <Form.Item name="type" label="类型">
-              <Select>
-                {Object.entries(types).map(([key, val]) => {
-                  return (
-                    <Select.Option key={key} value={val.id}>
-                      {val.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-            <Form.Item name="model_id" label="模型">
-              <Select>
-                {Object.entries(model).map(([key, val]) => {
-                  return (
-                    <Select.Option key={key} value={val.id}>
-                      {val.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-            <Form.Item name="intro" label="介绍">
-              <Input.TextArea rows={4} />
-            </Form.Item>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="生成设置" key="2">
-            <Form.Item label="生成静态" name="sethtml">
-              <Radio.Group>
-                <Radio value={1}>生成静态</Radio>
-                <Radio value={2}>跟随系统</Radio>
-              </Radio.Group>
-            </Form.Item>
-
-            <Form.Item name="is_login" label="是否登录">
-              <Radio.Group>
-                <Radio value={1}>登录可见</Radio>
-                <Radio value={2}>游客可见</Radio>
-              </Radio.Group>
-            </Form.Item>
-            <Form.Item name="is_column" label="后台可见">
-              <Radio.Group>
-                <Radio value={1}>显示</Radio>
-                <Radio value={2}>隐藏</Radio>
-              </Radio.Group>
-            </Form.Item>
-            <Form.Item name="is_menu" label="前台可见">
-              <Radio.Group>
-                <Radio value={1}>显示</Radio>
-                <Radio value={2}>隐藏</Radio>
-              </Radio.Group>
-            </Form.Item>
-
-            <Form.Item name="childmap" label="栏目映射">
-              <Input />
-            </Form.Item>
-            <Form.Item name="controller" label="内容映射">
-              <Input />
-            </Form.Item>
-            <Form.Item name="method" label="映射功能">
-              <Input />
-            </Form.Item>
-            <Form.Item name="catdir" label="生成文件">
-              <Input />
-            </Form.Item>
-            <Form.Item name="url" label="链接">
-              <Input />
-            </Form.Item>
-            <Form.Item name="letter" label="英文">
-              <Input />
-            </Form.Item>
-            <Form.Item name="purl" label="生成地址">
-              <Input />
-            </Form.Item>
-            <Form.Item name="template_content" label="内容模板">
-              <Select>
-                {Object.entries(templates).map(([key, val]) => {
-                  return (
-                    <Select.Option key={key} value={val.id}>
-                      {val.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-            <Form.Item name="template_list" label="列表模板">
-              <Select>
-                {Object.entries(templates).map(([key, val]) => {
-                  return (
-                    <Select.Option key={key} value={val.id}>
-                      {val.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-            <Form.Item name="template_category" label="栏目模板">
-              <Select>
-                {Object.entries(templates).map(([key, val]) => {
-                  return (
-                    <Select.Option key={key} value={val.id}>
-                      {val.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="高级设置" key="3">
-            <Form.Item name="keywords" label="关键词">
-              <Input.TextArea rows={4} />
-            </Form.Item>
-            <Form.Item name="description" label="描述">
-              <Input.TextArea rows={4} />
-            </Form.Item>
-            <Form.Item name="expand" label="扩展信息">
-              <Input.TextArea rows={4} />
-            </Form.Item>
-          </Tabs.TabPane>
-        </Tabs>
-      </>
-    );
+          <Form.Item name="childmap" label="栏目映射">
+            <Input />
+          </Form.Item>
+          <Form.Item name="controller" label="内容映射">
+            <Input />
+          </Form.Item>
+          <Form.Item name="method" label="映射功能">
+            <Input />
+          </Form.Item>
+          <Form.Item name="catdir" label="生成文件">
+            <Input />
+          </Form.Item>
+          <Form.Item name="url" label="链接">
+            <Input />
+          </Form.Item>
+          <Form.Item name="letter" label="英文">
+            <Input />
+          </Form.Item>
+          <Form.Item name="purl" label="生成地址">
+            <Input />
+          </Form.Item>
+          <Form.Item name="template_content" label="内容模板">
+            <Select>
+              {Object.entries(templates).map(([key, val]) => {
+                return (
+                  <Select.Option key={key} value={val.id}>
+                    {val.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+          <Form.Item name="template_list" label="列表模板">
+            <Select>
+              {Object.entries(templates).map(([key, val]) => {
+                return (
+                  <Select.Option key={key} value={val.id}>
+                    {val.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+          <Form.Item name="template_category" label="栏目模板">
+            <Select>
+              {Object.entries(templates).map(([key, val]) => {
+                return (
+                  <Select.Option key={key} value={val.id}>
+                    {val.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="高级设置" key="3">
+          <Form.Item name="keywords" label="关键词">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+          <Form.Item name="description" label="描述">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+          <Form.Item name="expand" label="扩展信息">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+        </Tabs.TabPane>
+      </Tabs>
+    </>);
   }
   /**
    * 添加、编辑
@@ -793,59 +791,57 @@ class Columns extends Basic_Authorize<{}, State> {
   __render_children() {
     const state = this.state as State;
     const children = state.columns_children;
-    return (
-      <>
-        <Tree
-          className="draggable-tree"
-          showLine={{ showLeafIcon: false }}
-          draggable
-          blockNode
-          onDragEnd={this.handle_drag_end}
-          onDrop={this.handle_drop}
-          onSelect={this.handle_select}
-          treeData={children}
-        />
-        <Drawer
-          title={(state.u_action === "add" ? "添加" : "编辑") + "栏目"}
-          width={"61.8%"}
-          forceRender={true}
-          onClose={this.handle_drawer_close}
-          visible={state.drawer_visible}
-          bodyStyle={{ paddingBottom: 80 }}
-          footer={
-            <div
-              style={{
-                textAlign: "right",
-              }}
-            >
-              <Button
-                shape="round"
-                style={{ marginRight: 8 }}
-                onClick={this.handle_drawer_close}
-              >
-                取消
-              </Button>
-              <Button
-                shape="round"
-                loading={this.props.server.loading}
-                type="primary"
-                onClick={this.handle_drawer_submit}
-              >
-                提交
-              </Button>
-            </div>
-          }
-        >
-          <Form
-            ref={this.formRef}
-            onFinish={this.handle_submit}
-            {...this.__form_item_layout()}
+    return (<>
+      <Tree
+        className="draggable-tree"
+        showLine={{ showLeafIcon: false }}
+        draggable
+        blockNode
+        onDragEnd={this.handle_drag_end}
+        onDrop={this.handle_drop}
+        onSelect={this.handle_select}
+        treeData={children}
+      />
+      <Drawer
+        title={(state.u_action === "add" ? "添加" : "编辑") + "栏目"}
+        width={"61.8%"}
+        forceRender={true}
+        onClose={this.handle_drawer_close}
+        open={state.drawer_visible}
+        bodyStyle={{ paddingBottom: 80 }}
+        footer={
+          <div
+            rootStyle={{
+              textAlign: "right",
+            }}
           >
-            {this.__render_add_edit_children(state.u_action)}
-          </Form>
-        </Drawer>
-      </>
-    );
+            <Button
+              shape="round"
+              rootStyle={{ marginRight: 8 }}
+              onClick={this.handle_drawer_close}
+            >
+              取消
+            </Button>
+            <Button
+              shape="round"
+              loading={this.props.server.loading}
+              type="primary"
+              onClick={this.handle_drawer_submit}
+            >
+              提交
+            </Button>
+          </div>
+        }
+      >
+        <Form
+          ref={this.formRef}
+          onFinish={this.handle_submit}
+          {...this.__form_item_layout()}
+        >
+          {this.__render_add_edit_children(state.u_action)}
+        </Form>
+      </Drawer>
+    </>);
   }
   /*----------------------4 render end  ----------------------*/
 }
