@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import Basic_Component from "../../components/base/component";
 import { connect } from "react-redux";

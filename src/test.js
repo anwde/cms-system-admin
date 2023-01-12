@@ -12,6 +12,6 @@ window.wu = "authorize.youyan.cc";
 
 // webapi.store.dispatch({ type: "STORE", data: w });
 webapi.store.dispatch({ type: "INITIALIZE",data:{},reducers:'SETTINGS' });
-webapi.request.get("authorize/auth/id", {data:{
+webapi.request.get("auth/id", {data:{
   id: 8,
 }}); 

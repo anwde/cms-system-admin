@@ -28,9 +28,9 @@ const confirm = function (options = {}) {
   });
 };
 async function server() {
-  console.log("server=>", 111); 
+  // console.log("server=>", 111); 
   let data = await request.get("server/check",{data:{vt:new Date().getTime()}});
-  console.log("server=>", data); 
+  // console.log("server=>", data); 
   if (data.code === 10000) {
     window.ucdata = data.ucdata;
     const t = { type: "SERVER" };

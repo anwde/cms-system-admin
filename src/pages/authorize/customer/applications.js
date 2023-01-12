@@ -3,7 +3,18 @@ import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import webapi from "@/utils/webapi";
 import moment from "moment";
-import { Form, Input, Radio, Space, Tabs, Table, Button, Upload ,Menu,Dropdown} from "antd";
+import {
+  Form,
+  Input,
+  Radio,
+  Space,
+  Tabs,
+  Table,
+  Button,
+  Upload,
+  Menu,
+  Dropdown,
+} from "antd";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import "braft-editor/dist/index.css";
 import BraftEditor from "braft-editor";
@@ -179,14 +190,14 @@ class Applications extends Basic_Customer {
   _render_dropdown_menus_action = (data) => {
     return (
       <Menu>
-        <Menu.Item key='pages_1'>
+        <Menu.Item key="pages_1">
           <Link to={`/authorize/customer/applications/pages/${data.id}`}>
             <Button type="primary" shape="round">
               页面管理
             </Button>
           </Link>
         </Menu.Item>
-        <Menu.Item key='pages_2'>
+        <Menu.Item key="pages_2">
           <Link to={`/authorize/customer/competence_user/index/${data.id}`}>
             <Button type="primary" shape="round">
               权限用户

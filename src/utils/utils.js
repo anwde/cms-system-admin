@@ -51,7 +51,7 @@ const title = function (t) {
   return t;
 };
 
-const query = (q)=> parse((q ? q : window.location.search).split("?")[1]);
+const query = (q):{}=> parse((q ? q : window.location.search).split("?")[1]);
 const http_build_query = (data) => qs.stringify(data);
 const redirect = (data) => {
   if (

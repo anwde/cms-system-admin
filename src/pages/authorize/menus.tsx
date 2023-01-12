@@ -1,28 +1,23 @@
-import React from "react";
-import Basic_Component from "../../components/base/component";
-import { Link } from "react-router-dom";
-import { connect } from "react-redux";
-import webapi from "../../utils/webapi";
-import moment from "moment";
-import ProTable from "@ant-design/pro-table";
-import type { ProColumns } from "@ant-design/pro-table";
 import {
-  Form,
+  DeleteOutlined,
+  EditOutlined
+} from "@ant-design/icons";
+import type { ProColumns } from "@ant-design/pro-table";
+import ProTable from "@ant-design/pro-table";
+import {
+  Button,
+  Cascader, Form,
   Input,
   Radio,
-  Select,
-  Table,
-  Button,
-  Cascader,
-  Space,
+  Select, Space
 } from "antd";
-import {
-  UploadOutlined,
-  SettingFilled,
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
 import { FormInstance } from "antd/lib/form";
+import moment from "moment";
+import React from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import Basic_Component from "../../components/base/component";
+import webapi from "../../utils/webapi";
 const BREADCRUMB = {
   title: "菜单",
   lists: [
@@ -110,8 +105,17 @@ class Menus extends Basic_Component {
     d.row_count = this.state.pagination.pageSize;
     d.offset = this.state.pagination.current;
     d.q = this.state.q;
-    var data = await webapi.request.get(url, d);
-    var lists = [];
+    if (!d.filters) {
+      d.filters = this.state.filters;
+    }
+    const query = webapi.utils.query();
+    if (query['filters']) {
+      try {
+        d.filters = JSON.parse(query['filters']);
+      } catch (err) {}
+    }
+    const data = await webapi.request.get(url, {data:d});
+    let lists = [];
     if (data.code === 10000 && data.num_rows > 0) {
       lists = data.lists;
     }
@@ -302,18 +306,20 @@ class Menus extends Basic_Component {
         },
 
         valueType: "dateRange",
-        search: {
-          transform: (value) => {
-            return {
-              start_time: value[0],
-              end_time: value[1],
-            };
-          },
-        },
+        // search: {
+        //   transform: (value) => {
+        //     return {
+        //       start_time: value[0],
+        //       end_time: value[1],
+        //     };
+        //   },
+        // },
+        search: false,
       },
       {
         title: "操作",
         align: "center",
+        fixed: "right",
         search: false,
         render: (_, row) => {
           return (
@@ -337,8 +343,7 @@ class Menus extends Basic_Component {
       },
     ];
     return (
-      <ProTable
-        
+      <ProTable 
         rowKey={"id"}
         columns={columns}
         pagination={this.state.pagination}

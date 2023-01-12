@@ -21,6 +21,10 @@ const Customer_competence_user = lazy(
   () => import("../pages/authorize/customer/competence_user")
 );
 
+const Books = lazy(
+  () => import("../pages/books/books")
+);
+
 let routes: Server.Routes[] = [
   {
     path: "/authorize/account",
@@ -106,17 +110,21 @@ let routes: Server.Routes[] = [
         ],
       },
       {
-        path: "/authorize/customer/applications_extend/:method",
+        path: "/authorize/customer/applications_extend/:method/:applications_id",
         component: Customer_applications_extend,
         children: [
-          { path: "/authorize/customer/applications_extend/:method/:id" },
+          {
+            path: "/authorize/customer/applications_extend/:method/:applications_id/:id",
+          },
         ],
       },
       {
-        path: "/authorize/customer/applications_extend_items/:method",
+        path: "/authorize/customer/applications_extend_items/:method/:extend_id",
         component: Customer_applications_extend_items,
         children: [
-          { path: "/authorize/customer/applications_extend_items/:method/:id" },
+          {
+            path: "/authorize/customer/applications_extend_items/:method/:extend_id/:id",
+          },
         ],
       },
       {
@@ -124,6 +132,27 @@ let routes: Server.Routes[] = [
         component: Customer_competence_user,
         children: [{ path: "/authorize/customer/competence_user/:method/:id" }],
       },
+    ],
+  },
+  {
+    path: "/books",
+    component: Books,
+    children: [
+      {
+        path: "/books/books/:method/:id", 
+        component: Books,
+        children: [
+          {
+            path: "/books/volume/:method/:book_id/:id?",
+            component: Books,
+          }, 
+          {
+            path: "/books/chapter/:method/:book_id/:id?",
+            component: Books,
+          },
+        ],
+      },
+      
     ],
   },
 ];

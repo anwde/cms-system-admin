@@ -1,9 +1,13 @@
 import React from "react";
 import webapi from "../../utils/webapi";
 import store from "../../redux/store";
-import type { TablePaginationConfig } from "antd";
+import type {
+  TablePaginationConfig
+} from "antd";
 interface NavigationBarProps {
-  server: { loading: boolean };
+  server: {
+    loading: boolean
+  };
   match: {
     params: Object,
   };
@@ -12,14 +16,14 @@ interface NavigationBarProps {
   };
 }
 
-export default class Basic_Component extends React.Component<NavigationBarProps> {
+export default class Basic_Component extends React.Component < NavigationBarProps > {
   interval = 0;
   /**
    * 构造
    */
   constructor(props = {}) {
     super(props);
-    console.log("props data=>", props);
+    // console.log("props data=>", props);
     this.state = this.__init_state();
   }
   /**
@@ -64,7 +68,10 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * 面包屑导航
    */
   __breadcrumb(data = {}) {
-    store.dispatch({ type: "BREADCRUMB", data: data });
+    store.dispatch({
+      type: "BREADCRUMB",
+      data: data
+    });
   }
   __get_method(type: String) {
     return `__${type}_${this.state.method}`;
@@ -75,11 +82,11 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
   __getName() {
     let funcNameRegex = /function (.{1,})\(/;
     let results = funcNameRegex.exec(this.constructor.toString());
-    return results && results.length > 1
-      ? results[1]
-      : this.constructor.name
-      ? this.constructor.name
-      : "";
+    return results && results.length > 1 ?
+      results[1] :
+      this.constructor.name ?
+      this.constructor.name :
+      "";
   }
 
   /**
@@ -111,15 +118,22 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
 
   __form_item_layout = () => {
     return {
-      labelCol: { span: 2 },
-      wrapperCol: { span: 20 },
+      labelCol: {
+        span: 2
+      },
+      wrapperCol: {
+        span: 20
+      },
     };
   };
 
   __tail_layout = () => {
     return {
       onValuesChange: this.__handle_values_change,
-      wrapperCol: { offset: 4, span: 14 },
+      wrapperCol: {
+        offset: 2,
+        span: 20
+      },
     };
   };
   __upload_single_props = (options = {}) => {
@@ -155,7 +169,9 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    */
   __setinterval(c = 200, success: any, d = 1000, _after: any) {
     let count = c;
-    this.setState({ count });
+    this.setState({
+      count
+    });
     this.interval = window.setInterval(() => {
       count -= 1;
       success(count);
@@ -207,7 +223,9 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
       order_field: "create_time",
       order_value: "desc",
       filters: [],
-      data: { id: 0 },
+      data: {
+        id: 0
+      },
       lists: [],
       pagination: this.__init_page_data(query),
       ...this.__init_state_after(),
@@ -234,7 +252,9 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * @return obj
    */
   __init_state_after(): {} {
-    return { columns_children: [] };
+    return {
+      columns_children: []
+    };
   }
   __init_page_data(data = {}): TablePaginationConfig {
     // console.log('1111=>',TablePaginationConfig)
@@ -299,11 +319,12 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    */
   __handle_page_change = (page, page_size) => {
     let method = this.__get_method("init");
-    const pager = { ...this.state.pagination };
+    const pager = {
+      ...this.state.pagination
+    };
     pager.current = page;
     pager.pageSize = page_size;
-    this.setState(
-      {
+    this.setState({
         pagination: pager,
       },
       () => {
@@ -350,15 +371,17 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    */
   __handle_table_change = (pagination, filters, sorter) => {
     // console.log('__handle_table_change',pagination, filters, sorter);
-    const page = { ...this.state.pagination, ...pagination };
+    const page = {
+      ...this.state.pagination,
+      ...pagination
+    };
     const order_field = sorter.field ? sorter.field : this.state.order_field;
-    const order_value = sorter.field
-      ? sorter.order === "ascend"
-        ? "asc"
-        : "desc"
-      : this.state.order_value;
-    this.setState(
-      {
+    const order_value = sorter.field ?
+      sorter.order === "ascend" ?
+      "asc" :
+      "desc" :
+      this.state.order_value;
+    this.setState({
         filters,
         order_field: order_field,
         order_value: order_value,
@@ -375,7 +398,7 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
    * @param filter
    * @return mixed
    */
-  __handle_tablepro_request = (params = {}, sorts, filter):[] => {
+  __handle_tablepro_request = (params = {}, sorts, filter): [] => {
     let filters = webapi.utils.deepclone(params);
     const s = Object.keys(sorts);
     let field = "";
@@ -387,15 +410,22 @@ export default class Basic_Component extends React.Component<NavigationBarProps>
     delete filters.current;
     delete filters.pageSize;
     this.__handle_table_change(
-      params,
-      { ...filter, ...filters },
-      { field, order }
+      params, {
+        ...filter,
+        ...filters
+      }, {
+        field,
+        order
+      }
     );
-    console.log(params,sorts,filter)
+    console.log(params, sorts, filter, filters)
     return [];
   };
   __handle_scroll_top = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   };
   __handle_search = () => {
     const val = this.state.query_q;

@@ -1,4 +1,4 @@
-import React, { RefObject } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import webapi from "../../utils/webapi";
@@ -359,7 +359,7 @@ class Columns extends Basic_Authorize<{}, State> {
   };
   handle_icon_show = () => {
     const state = this.state as State;
-    this.setState({ icon_visible: true,icon:state.data.icon });
+    this.setState({ icon_visible: true, icon: state.data.icon });
   };
   handle_icon_clos = () => {
     this.setState({ icon_visible: false });
@@ -525,13 +525,13 @@ class Columns extends Basic_Authorize<{}, State> {
         columns={columns}
         pagination={this.state.pagination}
         dataSource={this.state.lists}
-        loading={this.props.server.loading}
+        // loading={this.props.server.loading}
         onChange={this.__handle_table_change}
         scroll={{ x: 1500, y: "calc(100vh - 290px)" }}
         toolBarRender={() => [
-          <Button type="primary" key="primary" onClick={() => {}}>
-            新建
-          </Button>,
+          // <Button type="primary" key="primary" onClick={() => {}}>
+          //   新建
+          // </Button>,
         ]}
         search={{
           labelWidth: 120,
@@ -575,7 +575,10 @@ class Columns extends Basic_Authorize<{}, State> {
                 return (
                   <li
                     key={key}
-                    className={classnames(styles.li,state.icon===key?styles.hover:"")}
+                    className={classnames(
+                      styles.li,
+                      state.icon === key ? styles.hover : ""
+                    )}
                     onClick={() => {
                       this.handle_icon_select(key);
                     }}
@@ -626,7 +629,9 @@ class Columns extends Basic_Authorize<{}, State> {
                 type="primary"
                 shape="circle"
                 size="large"
-                icon={<Icon component={Icons[data.icon]}  style={{fontSize:30}}/>}
+                icon={
+                  <Icon component={Icons[data.icon]} style={{ fontSize: 30 }} />
+                }
                 onClick={() => {
                   this.handle_icon_show();
                 }}

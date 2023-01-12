@@ -18,7 +18,7 @@ const reducer = (state = defaultState, action) => {
     newState.loading = action.state;
   }
   if (action.type === "SERVER") {
-    console.log("props=>",action.type,action.data.columns);
+    // console.log("props=>",action.type,action.data.columns);
     newState.ucdata = action.data.ucdata;
     newState.columns = action.data.columns;
     newState.menus = action.data.menus;

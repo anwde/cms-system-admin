@@ -22,12 +22,15 @@ const loopMenuItem = (
   columns: [],
   is_children: boolean = false
 ): MenuDataItem[] => {
-  return columns.map(({ icon, children, name, url }) => ({
-    name,
-    icon: icon ? <Icon component={Icons[icon]} /> : "",
-    path: url,
-    routes: children && loopMenuItem(children, true),
-  }));
+  return columns.map(({ icon, children, name, url, id }) => {
+    return {
+      key: `${id}`,
+      name,
+      icon: icon && Icons[icon] ? <Icon component={Icons[icon]} /> : "",
+      path: url,
+      routes: children && loopMenuItem(children, true),
+    };
+  });
 };
 
 const Irouters = (Server_routes: Server.Routes[]) => {
@@ -47,7 +50,7 @@ const Irouters = (Server_routes: Server.Routes[]) => {
   rs(Server_routes);
   return r;
 };
-console.log("props=>", Irouters(routers));
+// console.log("props=>", Irouters(routers));
 const container_extra = (buttons: [{ onClick: ""; url: ""; title: "" }]) => {
   return buttons.map((val, key) => {
     return (
@@ -56,7 +59,9 @@ const container_extra = (buttons: [{ onClick: ""; url: ""; title: "" }]) => {
         key={key}
         to={val.url ? val.url : "#!"}
       >
-        <Button>{val.title}</Button>
+        <Button type="primary" shape="round">
+          {val.title}
+        </Button>
       </Link>
     );
   });
@@ -69,7 +74,7 @@ const Layout = () => {
   const { columns, breadcrumb } = useSelector(
     (state: Server.Props) => state.server
   );
-  console.log("breadcrumb=>", breadcrumb);
+  // console.log("breadcrumb=>", breadcrumb);
   return (
     <>
       <ProLayout
@@ -102,15 +107,8 @@ const Layout = () => {
           });
         }}
         breadcrumbProps={{
-          itemRender: (route, params, routes, paths) => {
-            return  <Link to={'/'+paths.join("/")}>{route.breadcrumbName}</Link>;
-            // console.log(route, params, routes, paths)
-            // const last = routes.indexOf(route) === routes.length - 1;
-            // return last ? (
-            //   <span>{route.breadcrumbName}</span>
-            // ) : (
-            //   <Link to={paths.join("/")}>{route.breadcrumbName}</Link>
-            // );
+          itemRender: (route) => {
+            return <Link to={route.path}>{route.breadcrumbName}</Link>;
           },
         }}
         {...settings}
@@ -130,7 +128,7 @@ const Layout = () => {
           </PageContainer>
         </div>
       </ProLayout>
-      {/* <SettingDrawer
+      <SettingDrawer
         pathname={pathname}
         enableDarkTheme
         getContainer={() => document.getElementById("container")}
@@ -139,7 +137,7 @@ const Layout = () => {
           setSetting(changeSetting);
         }}
         disableUrlParams={false}
-      /> */}
+      />
     </>
   );
 };

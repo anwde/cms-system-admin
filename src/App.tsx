@@ -35,7 +35,7 @@ class App extends React.Component<{}, State> {
       this.setState({
         server: d.server,
       });
-      console.log("props=>", d);
+      // console.log("props=>", d);
     });
   }
   /*--------------------------------------------------------------------------------

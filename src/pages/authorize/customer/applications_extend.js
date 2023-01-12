@@ -1,20 +1,19 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import webapi from "@/utils/webapi";
 import Basic_Customer from "./basic.js";
 import moment from "moment";
-import { Form, Input, Table, Button, Select } from "antd";
+import { Space, Form, Input, Table, Button, Select } from "antd";
+import { DeleteOutlined, EditOutlined, MenuOutlined } from "@ant-design/icons";
 const BREADCRUMB = {
   title: "拓展项管理",
   lists: [
     { title: "主页", url: "/" },
-    { title: "商户管理", url: "/customer" },
+    { title: "商户管理", url: "/authorize/customer" },
   ],
-  buttons: [{ title: "添加商户", url: "/customer/add" }],
+  buttons: [{ title: "添加商户", url: "/authorize/customer/add" }],
 };
 class Applications_extend extends Basic_Customer {
-   
   /*----------------------0 parent start----------------------*/
   /**
    * 面包屑导航
@@ -42,15 +41,15 @@ class Applications_extend extends Basic_Customer {
     b.buttons = [
       {
         title: "添加",
-        url: `/customer/applications_extend/add/${applications_id}`,
+        url: `/authorize/customer/applications_extend/add/${applications_id}`,
       },
     ];
     b.lists = BREADCRUMB.lists.concat();
     b.lists.push({
       title: "应用",
-      url: `/customer/applications?customer_id=${app.customer_id}`,
+      url: `/authorize/customer/applications?customer_id=${app.customer_id}`,
     });
-    this.init_lists("customer/applications_extend/lists", d, b, {
+    this.init_lists("authorize/customer/applications_extend/lists", d, b, {
       type,
     });
   }
@@ -60,7 +59,7 @@ class Applications_extend extends Basic_Customer {
     let data = {};
     if (action === "edit" && this.state.id) {
       const res = await webapi.request.get(
-        "customer/applications_extend/get",
+        "authorize/customer/applications_extend/get",
         {
           data: { id: this.state.id },
         }
@@ -93,19 +92,26 @@ class Applications_extend extends Basic_Customer {
     data.id = this.state.id;
     data.applications_id = this.state.applications_id;
     const res = await webapi.request.post(
-      "customer/applications_extend/dopost",
+      "authorize/customer/applications_extend/dopost",
       { data }
     );
     if (res.code === 10000) {
       webapi.message.success(res.message);
       this.props.history.replace(
-        "/customer/applications_extend/index/" +
-          this.state.applications_id
+        "/authorize/customer/applications_extend/index/" +
+        this.state.applications_id
       );
     } else {
       webapi.message.error(res.message);
     }
   };
+  /**
+   * 删除
+   **/
+
+  handle_delete(id) {
+    this.handle_do_delete("applications/applications_extend", id);
+  }
   /*----------------------3 handle end  ----------------------*/
 
   /*----------------------4 render start  ----------------------*/
@@ -115,8 +121,8 @@ class Applications_extend extends Basic_Customer {
   __render_index() {
     const type = this.state.type || {};
     const type_filters = Object.keys(type).map((key) => {
-			return { text: type[key].name, value: key };
-		});
+      return { text: type[key].name, value: key };
+    });
     const columns = [
       {
         title: "名称",
@@ -136,18 +142,18 @@ class Applications_extend extends Basic_Customer {
       },
       {
         title: "类型",
-        sorter: true, 
+        sorter: true,
         dataIndex: "type",
         align: "center",
         width: "100px",
-        filters:type_filters,
+        filters: type_filters,
         render: (field, data) => {
           return type[data.type] && type[data.type].name;
         },
       },
       {
         title: "排序",
-        sorter: true, 
+        sorter: true,
         dataIndex: "idx",
         align: "center",
         width: "100px",
@@ -180,56 +186,52 @@ class Applications_extend extends Basic_Customer {
         align: "center",
         width: "200px",
         fixed: "right",
-        render: (d, i) => {
+        render: (d) => {
           return (
-            <div>
-              <a
-                className="btn btn-outline-info btn-circle btn-lg btn-circle"
-                title="删除"
-                href="#!"
-                onClick={() => {
-                  this.__handle_delete(d.id);
-                }}
-              >
-                <i className="ti-trash" />{" "}
-              </a>
-              <Link
-                to={
-                  "/customer/applications_extend_items/index/" + d.id
-                }
-                className="btn btn-outline-info btn-circle btn-lg btn-circle ml-2"
-              >
-                <i className="ti-menu-alt" />
-              </Link>
+            
+              <Space>
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<DeleteOutlined />}
+                  title="删除"
+                  onClick={() => {
+                    this.handle_delete(d.id);
+                  }}
+                />
 
-              <Link
-                to={
-                  "/customer/applications_extend/edit/" +
-                  d.applications_id +
-                  "/" +
-                  d.id
-                }
-                className="btn btn-outline-info btn-circle btn-lg btn-circle ml-2"
+                <Link
+                  to={`/authorize/customer/applications_extend/edit/${d.applications_id}/${d.id}`}
+                >
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<EditOutlined />}
+                  />
+                </Link>
+                <Link
+                to={`/authorize/customer/applications_extend_items/index/${d.id}`}
               >
-                <i className="ti-pencil-alt" />
+                <Button type="primary" shape="circle" icon={<MenuOutlined />} />
               </Link>
-            </div>
+              </Space>
+
+              
+             
           );
         },
       },
     ];
     return (
-      
-        <Table
-          rowKey={(res) => res.id}
-          columns={columns}
-          dataSource={this.state.lists}
-          pagination={this.state.pagination}
-          loading={this.props.loading}
-          onChange={this.__handle_table_change}
-          scroll={{ x: 1000, y: "calc(100vh - 290px)" }}
-        />
-     
+      <Table
+        rowKey={(res) => res.id}
+        columns={columns}
+        dataSource={this.state.lists}
+        pagination={this.state.pagination}
+        loading={this.props.loading}
+        onChange={this.__handle_table_change}
+        scroll={{ x: 1000, y: "calc(100vh - 290px)" }}
+      />
     );
   }
   /**
@@ -276,7 +278,7 @@ class Applications_extend extends Basic_Customer {
           </Button>
           <Link
             className="button"
-            to={`/customer/applications_extend/index/${this.state.applications_id}`}
+            to={`/authorize/customer/applications_extend/index/${this.state.applications_id}`}
           >
             返回
           </Link>
